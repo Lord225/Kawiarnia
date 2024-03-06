@@ -10,21 +10,27 @@ public class DeployableObject
     public string path;
 }
 
-public class ModelLoader
+public class ModelLoader : MonoBehaviour
 {
-    public List<DeployableObject> objectsToDeploy;
-
-    private void Start()
-    {
-        InitialzeModels(objectsToDeploy);
-    }
-
-    private void InitialzeModels(List<DeployableObject> objectsToDeploy)
+    public void InitialzeModels(List<DeployableObject> objectsToDeploy, Transform parent)
     {
         foreach (var deployableObject in objectsToDeploy)
         {
-            var loadedObj = new OBJLoader().Load(deployableObject.path);
-            loadedObj.transform.position = deployableObject.location;
+            if (System.IO.File.Exists(deployableObject.path))
+            {
+                // Loading and initializing .obj at given path 
+                var loadedObj = new OBJLoader().Load(deployableObject.path);
+
+                // Setting appropriate transform parameters
+                loadedObj.transform.position = deployableObject.location;
+                loadedObj.transform.SetParent(parent);
+            }
+            else
+            {
+                Debug.LogWarning("Failed to load " + deployableObject.path);
+            }
+
+            
         }
     }
 }
