@@ -3,8 +3,8 @@
   "WorkspaceRootPath": "C:\\Users\\Maciej\\unityrepos\\Kawiarnia\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Maciej\\unityrepos\\Kawiarnia\\Assets\\TestSkryptu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\TestSkryptu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{9F2FAA4C-55B2-FA53-9C52-5EDF37AFC4BB}|Assembly-CSharp.csproj|c:\\users\\maciej\\unityrepos\\kawiarnia\\assets\\testskryptu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9F2FAA4C-55B2-FA53-9C52-5EDF37AFC4BB}|Assembly-CSharp.csproj|solutionrelative:assets\\testskryptu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -22,8 +22,8 @@
               "Title": "TestSkryptu.cs",
               "DocumentMoniker": "C:\\Users\\Maciej\\unityrepos\\Kawiarnia\\Assets\\TestSkryptu.cs",
               "RelativeDocumentMoniker": "Assets\\TestSkryptu.cs",
-              "ToolTip": "C:\\Users\\Maciej\\unityrepos\\Kawiarnia\\Assets\\TestSkryptu.cs*",
-              "RelativeToolTip": "Assets\\TestSkryptu.cs*",
+              "ToolTip": "C:\\Users\\Maciej\\unityrepos\\Kawiarnia\\Assets\\TestSkryptu.cs",
+              "RelativeToolTip": "Assets\\TestSkryptu.cs",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAAYAAAALAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-03-05T08:05:49.35Z",
