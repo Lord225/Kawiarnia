@@ -105,14 +105,30 @@ public class SceneLoaderController : MonoBehaviour
 
     private void prepereScene(SceneDescription scene)
     {
+        // create parent object for all OOS (Objects On Screen) for better categorization
+        GameObject OOSParent = new GameObject("OOS");
+        OOSParent.transform.position = Vector3.zero;
+        OOSParent.transform.parent = transform;
+
         // prepere prefabs from loaded objects and place them.
         Debug.Log("Placing " + scene.objectsOnScreen.Count + " objects");
         if (scene.objectsOnScreen.Count != 0)
         {
-            modelLoader.InitialzeModels(scene.objectsOnScreen, this.transform);
+            modelLoader.InitialzeModels(scene.objectsOnScreen, OOSParent.transform);
         }
 
         // place door prefabs and other mandatory stuff
+        GameObject DoorsParent = new GameObject("Doors");
+        DoorsParent.transform.position = Vector3.zero;
+        DoorsParent.transform.parent = transform;
+
+        GameObject CafeParent = new GameObject("Cafe");
+        CafeParent.transform.position = Vector3.zero;
+        CafeParent.transform.parent = transform;
+
+        GameObject TablesParent = new GameObject("Tables");
+        TablesParent.transform.position = Vector3.zero;
+        TablesParent.transform.parent = transform;
 
         // build navigation on map
     }
