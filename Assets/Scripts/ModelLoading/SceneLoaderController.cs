@@ -40,10 +40,12 @@ public class SceneDescription
     public List<TransformOrigin> barsPositions;
 }
 
+[RequireComponent(typeof(ModelLoader))]
 public class SceneLoaderController : MonoBehaviour
 {
     // abs paths works too, if no abs path it will add project dir so sceneDescription\scene1 is enought.
     public string sceneDescriptonPath = string.Empty;
+    public ModelLoader modelLoader;
 
 
     public void loadScene()
@@ -53,18 +55,21 @@ public class SceneLoaderController : MonoBehaviour
 
     public void loadScene(string path)
     {
+        // getting back to clean state
+        CleanupScene();
+
         // load file from disc
         var scene = loadFromJson(sceneDescriptonPath);
 
         Debug.Log($"Loaded description of scene {scene.name}");
 
         // load objects
-
+        
         // lets assume it will load everyting as child to this script.
 
         // loadGlobalSettings();
 
-        prepereScene();
+        prepereScene(scene);
 
     }
 
@@ -98,24 +103,35 @@ public class SceneLoaderController : MonoBehaviour
         return scene;
     }
 
-    private void prepereScene()
+    private void prepereScene(SceneDescription scene)
     {
         // prepere prefabs from loaded objects and place them.
-        
+        Debug.Log("Placing " + scene.objectsOnScreen.Count + " objects");
+        if (scene.objectsOnScreen.Count != 0)
+        {
+            modelLoader.InitialzeModels(scene.objectsOnScreen, this.transform);
+        }
+
         // place door prefabs and other mandatory stuff
-        
+
         // build navigation on map
     }
 
-    // Start is called before the first frame update
-    void Start()
+    // Remove remants of last loaded scene if any
+    private void CleanupScene()
     {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        // Every object on scene is a child of this one so we just need to destroy them all    
+        for (int i = this.transform.childCount; i > 0; --i)
+        {
+            // Destroy doesn't work in editor mode thus second version
+            if (!Application.isEditor)
+            {
+                Destroy(this.transform.GetChild(0).gameObject);
+            }
+            else
+            {
+                DestroyImmediate(this.transform.GetChild(0).gameObject);
+            }
+        }
     }
 }

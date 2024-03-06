@@ -2,7 +2,24 @@
     "name": "Hello World",
     "sizeX": 10,
     "sizeY": 10,
-    "objectsOnScreen": [],
+    "objectsOnScreen": [
+      {
+        "location": {
+          "x": 0,
+          "y": 20,
+          "z": 30
+        },
+          "path": "C:/Resources/mushroom.obj"
+      },
+      {
+        "location": {
+          "x": 60,
+          "y": 0,
+          "z": 0
+        },
+          "path": "C:/Resources/mushroom.obj"
+      }
+    ],
     "doorsPositions": [],
     "barsPositions": []
 }
