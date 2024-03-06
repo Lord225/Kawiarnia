@@ -10,7 +10,7 @@ public class DeployableObject
     public string path;
 }
 
-public class ModelLoader : MonoBehaviour
+public class ModelLoader
 {
     public List<DeployableObject> objectsToDeploy;
 
