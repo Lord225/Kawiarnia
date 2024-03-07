@@ -30,7 +30,6 @@ public class CameraMovement : MonoBehaviour
     public AnimationCurve ScrollPower;
     public AnimationCurve Angle;
 
-
     public bool isMouseBlocked { get; private set; }
     public float height { get; private set; }
 
