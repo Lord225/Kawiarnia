@@ -49,7 +49,7 @@ public class SceneLoaderController : MonoBehaviour
     // abs paths works too, if no abs path it will add project dir so sceneDescription\scene1 is enought.
     public string sceneDescriptonPath = string.Empty;
 
-    private SceneDescription sceneDescription;
+    public SceneDescription sceneDescription;
 
     public ModelLoader modelLoader;
 
