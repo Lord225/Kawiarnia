@@ -29,8 +29,19 @@ public class ModelLoader : MonoBehaviour
             {
                 Debug.LogWarning("Failed to load " + deployableObject.path);
             }
+                      
+        }
+    }
 
-            
+    public void InitializeGameObjects(GameObject spawnedObject, List<Vector3> locations, Transform parent)
+    {
+        // Loading and initializing .obj at given path 
+        if (locations != null)
+        {
+            foreach (var location in locations)
+            {
+                Instantiate(spawnedObject, location, Quaternion.identity, parent);
+            }
         }
     }
 }

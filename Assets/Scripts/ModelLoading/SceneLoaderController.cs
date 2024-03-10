@@ -36,8 +36,11 @@ public class SceneDescription
     public float sizeY;
     public DeployableObject floorObject; //walkable surface (root for navmesh)
     public List<DeployableObject> objectsOnScreen; 
-    public List<TransformOrigin> doorsPositions;
-    public List<TransformOrigin> barsPositions;
+
+    // rotation and scale can be implemented further down the road?
+    public List<Vector3> doorsPositions;
+    public List<Vector3> barsPositions;
+    public List<Vector3> tablesPositions;
 }
 
 [RequireComponent(typeof(ModelLoader))]
@@ -45,7 +48,14 @@ public class SceneLoaderController : MonoBehaviour
 {
     // abs paths works too, if no abs path it will add project dir so sceneDescription\scene1 is enought.
     public string sceneDescriptonPath = string.Empty;
+
+    private SceneDescription sceneDescription;
+
     public ModelLoader modelLoader;
+
+    public GameObject doorObject;
+    public GameObject barObject;
+    public GameObject tableObject;
 
 
     public void loadScene()
@@ -59,9 +69,9 @@ public class SceneLoaderController : MonoBehaviour
         CleanupScene();
 
         // load file from disc
-        var scene = loadFromJson(sceneDescriptonPath);
+        sceneDescription = loadFromJson(sceneDescriptonPath);
 
-        Debug.Log($"Loaded description of scene {scene.name}");
+        Debug.Log($"Loaded description of scene {sceneDescription.name}");
 
         // load objects
         
@@ -69,7 +79,7 @@ public class SceneLoaderController : MonoBehaviour
 
         // loadGlobalSettings();
 
-        prepereScene(scene);
+        prepereScene();
 
     }
 
@@ -103,32 +113,44 @@ public class SceneLoaderController : MonoBehaviour
         return scene;
     }
 
-    private void prepereScene(SceneDescription scene)
+    private void prepereScene()
     {
         // create parent object for all OOS (Objects On Screen) for better categorization
-        GameObject OOSParent = new GameObject("OOS");
-        OOSParent.transform.position = Vector3.zero;
-        OOSParent.transform.parent = transform;
+        Transform OOSParent = new GameObject("OOS").transform;
+        OOSParent.position = Vector3.zero;
+        OOSParent.parent = transform;
 
         // prepere prefabs from loaded objects and place them.
-        Debug.Log("Placing " + scene.objectsOnScreen.Count + " objects");
-        if (scene.objectsOnScreen.Count != 0)
+        Debug.Log("Placing " + sceneDescription.objectsOnScreen.Count + " objects");
+        if (sceneDescription.objectsOnScreen.Count != 0)
         {
-            modelLoader.InitialzeModels(scene.objectsOnScreen, OOSParent.transform);
+            modelLoader.InitialzeModels(sceneDescription.objectsOnScreen, OOSParent.transform);
         }
 
         // place door prefabs and other mandatory stuff
-        GameObject DoorsParent = new GameObject("Doors");
-        DoorsParent.transform.position = Vector3.zero;
-        DoorsParent.transform.parent = transform;
+        Transform doorsParent = new GameObject("Doors").transform;
+        doorsParent.position = Vector3.zero;
+        doorsParent.parent = transform;
 
-        GameObject CafeParent = new GameObject("Cafe");
-        CafeParent.transform.position = Vector3.zero;
-        CafeParent.transform.parent = transform;
+        // instantinate doors at given postions
+        Debug.Log("Placing " + sceneDescription.doorsPositions.Count + " doors");
+        modelLoader.InitializeGameObjects(doorObject, sceneDescription.doorsPositions, doorsParent);
 
-        GameObject TablesParent = new GameObject("Tables");
-        TablesParent.transform.position = Vector3.zero;
-        TablesParent.transform.parent = transform;
+        Transform barsParent = new GameObject("Bars").transform;
+        barsParent.position = Vector3.zero;
+        barsParent.parent = transform;
+
+        // instantinate bars at given postions
+        Debug.Log("Placing " + sceneDescription.barsPositions.Count + " bars");
+        modelLoader.InitializeGameObjects(barObject, sceneDescription.barsPositions, barsParent);
+
+        Transform tablesParent = new GameObject("Tables").transform;
+        tablesParent.position = Vector3.zero;
+        tablesParent.parent = transform;
+
+        // instantinate tables at given postions
+        Debug.Log("Placing " + sceneDescription.tablesPositions.Count + " tables");
+        modelLoader.InitializeGameObjects(tableObject, sceneDescription.tablesPositions, tablesParent);
 
         // build navigation on map
     }
