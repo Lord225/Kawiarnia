@@ -1,40 +1,56 @@
 {
-    "name": "Hello World",
-    "sizeX": 10,
-    "sizeY": 10,
-    "objectsOnScreen": [
-      {
-        "location": {
-          "x": 10,
-          "y": 20,
-          "z": 30
-        },
-          "path": "C:/Resources/mushroom.obj"
-      },
-      {
-        "location": {
-          "x": 60,
-          "y": 0,
-          "z": 0
-        },
-        "path": "C:/Resources/mushroom.obj"
-      },
-      {
-        "location": {
-          "x": 30,
-          "y": 30,
-          "z": 30
-        },
-        "path": "C:/Resources/mushroom.obj"
-      }
-    ],
-  "doorsPositions": [
+  "name": "Hello World",
+  "sizeX": 10,
+  "sizeY": 10,
+  "objectsOnScreen": [
     {
-      "x": 20,
-      "y": 20,
-      "z": 10
+      "location": {
+        "x": 20,
+        "y": 0,
+        "z": 20
+      },
+      "path": "C:/Resources/mushroom.obj"
     }
   ],
-  "barsPositions": [],
-  "tablesPostions": []
+  "doorsPositions": [
+    {
+      "x": 25,
+      "y": 1,
+      "z": 0
+    },
+    {
+      "x": -25,
+      "y": 1,
+      "z": 0
+    }
+  ],
+  "barsPositions": [
+    {
+      "x": 0,
+      "y": 0.5,
+      "z": 0
+    }
+  ],
+  "tablesPositions": [
+    {
+      "x": 12.5,
+      "y": 0.5,
+      "z": 12.5
+    },
+    {
+      "x": -12.5,
+      "y": 0.5,
+      "z": 12.5
+    },
+    {
+      "x": 12.5,
+      "y": 0.5,
+      "z": -12.5
+    },
+    {
+      "x": -12.5,
+      "y": 0.5,
+      "z": -12.5
+    }
+  ]
 }
