@@ -7,6 +7,7 @@ using UnityEngine.UIElements;
 using System.IO;
 using System.Xml.Schema;
 using System.Linq;
+using JetBrains.Annotations;
 
 
 [CustomEditor(typeof(SceneLoaderController))]
@@ -27,6 +28,47 @@ public class SceneLoaderControllerEditor : Editor
     }
 }
 
+[Serializable]
+public class Transformation
+{
+    public float px = 0;
+    public float py = 0;
+    public float pz = 0;
+
+    public float rx = 0;
+    public float ry = 0;
+    public float rz = 0;
+
+    public float sx = 1;
+    public float sy = 1;
+    public float sz = 1;
+
+    public string id = string.Empty;
+
+    public Vector3 pos
+    {
+        get
+        {
+            return new Vector3(px, py, pz);
+        }
+    }
+
+    public Quaternion rot
+    {
+        get
+        {
+            return Quaternion.Euler(rx, ry, rz);
+        }
+    }
+
+    public Vector3 scale
+    {
+        get
+        {
+            return new Vector3(px, py, pz);
+        }
+    }
+}
 
 [Serializable]
 public class SceneDescription
@@ -38,9 +80,9 @@ public class SceneDescription
     public List<DeployableObject> objectsOnScreen; 
 
     // rotation and scale can be implemented further down the road?
-    public List<Vector3> doorsPositions;
-    public List<Vector3> barsPositions;
-    public List<Vector3> tablesPositions;
+    public List<Transformation> doorsPositions;
+    public List<Transformation> barsPositions;
+    public List<Transformation> tablesPositions;
 }
 
 [RequireComponent(typeof(ModelLoader))]

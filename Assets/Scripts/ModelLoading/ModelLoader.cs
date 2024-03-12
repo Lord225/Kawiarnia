@@ -3,10 +3,11 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+
+
 [Serializable]
-public class DeployableObject
+public class DeployableObject : Transformation
 {
-    public Vector3 location;
     public string path;
 }
 
@@ -22,7 +23,7 @@ public class ModelLoader : MonoBehaviour
                 var loadedObj = new OBJLoader().Load(deployableObject.path);
 
                 // Setting appropriate transform parameters
-                loadedObj.transform.position = deployableObject.location;
+                loadedObj.transform.position = deployableObject.pos ;
                 loadedObj.transform.SetParent(parent);
             }
             else
@@ -33,14 +34,15 @@ public class ModelLoader : MonoBehaviour
         }
     }
 
-    public void InitializeGameObjects(GameObject spawnedObject, List<Vector3> locations, Transform parent)
+    public void InitializeGameObjects(GameObject spawnedObject, List<Transformation> transforms, Transform parent)
     {
         // Loading and initializing .obj at given path 
-        if (locations != null)
+        if (transforms != null)
         {
-            foreach (var location in locations)
+            foreach (var location in transforms)
             {
-                Instantiate(spawnedObject, location, Quaternion.identity, parent);
+                Debug.Log(spawnedObject.name + location.pos);
+                Instantiate(spawnedObject, location.pos, location.rot, parent);
             }
         }
     }
