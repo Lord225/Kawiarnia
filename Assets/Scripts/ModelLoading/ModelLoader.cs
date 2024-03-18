@@ -23,7 +23,9 @@ public class ModelLoader : MonoBehaviour
                 var loadedObj = new OBJLoader().Load(deployableObject.path);
 
                 // Setting appropriate transform parameters
-                loadedObj.transform.position = deployableObject.pos ;
+                loadedObj.transform.position = deployableObject.pos;
+                loadedObj.transform.rotation = deployableObject.rot;
+                loadedObj.transform.localScale = deployableObject.scale;
                 loadedObj.transform.SetParent(parent);
             }
             else
@@ -41,7 +43,6 @@ public class ModelLoader : MonoBehaviour
         {
             foreach (var location in transforms)
             {
-                Debug.Log(spawnedObject.name + location.pos);
                 Instantiate(spawnedObject, location.pos, location.rot, parent);
             }
         }

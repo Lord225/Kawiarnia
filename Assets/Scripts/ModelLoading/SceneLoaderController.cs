@@ -8,6 +8,8 @@ using System.IO;
 using System.Xml.Schema;
 using System.Linq;
 using JetBrains.Annotations;
+using Unity.AI.Navigation;
+using System.Xml.Xsl;
 
 
 [CustomEditor(typeof(SceneLoaderController))]
@@ -24,6 +26,16 @@ public class SceneLoaderControllerEditor : Editor
         if (GUILayout.Button("Load Scene"))
         {
             loader.loadScene();
+        }
+
+        if (GUILayout.Button("Clear"))
+        {
+            loader.cleanupScene();
+        }
+
+        if (GUILayout.Button("Save Scene"))
+        {
+            loader.saveScene();
         }
     }
 }
@@ -45,6 +57,27 @@ public class Transformation
 
     public string id = string.Empty;
 
+    public static Transformation fromTransform(Transform other)
+    {
+        var result = new Transformation();
+
+        result.px = other.position.x;
+        result.py = other.position.y;
+        result.pz = other.position.z;
+
+        var euler = other.rotation.eulerAngles;
+
+        result.rx = euler.x;
+        result.ry = euler.y;
+        result.rz = euler.z;
+
+        result.sx = other.localScale.x;
+        result.sy = other.localScale.y;
+        result.sz = other.localScale.z;
+
+        return result;
+    }
+
     public Vector3 pos
     {
         get
@@ -65,7 +98,7 @@ public class Transformation
     {
         get
         {
-            return new Vector3(px, py, pz);
+            return new Vector3(sx, sy, sz);
         }
     }
 }
@@ -108,7 +141,7 @@ public class SceneLoaderController : MonoBehaviour
     public void loadScene(string path)
     {
         // getting back to clean state
-        CleanupScene();
+        cleanupScene();
 
         // load file from disc
         sceneDescription = loadFromJson(sceneDescriptonPath);
@@ -162,12 +195,15 @@ public class SceneLoaderController : MonoBehaviour
         OOSParent.position = Vector3.zero;
         OOSParent.parent = transform;
 
+        Transform floorParent = new GameObject("Floor").transform;
+
+        modelLoader.InitialzeModels(new List<DeployableObject> { sceneDescription.floorObject }, floorParent);
+
         // prepere prefabs from loaded objects and place them.
         Debug.Log("Placing " + sceneDescription.objectsOnScreen.Count + " objects");
-        if (sceneDescription.objectsOnScreen.Count != 0)
-        {
-            modelLoader.InitialzeModels(sceneDescription.objectsOnScreen, OOSParent.transform);
-        }
+
+        modelLoader.InitialzeModels(sceneDescription.objectsOnScreen, OOSParent.transform);
+        
 
         // place door prefabs and other mandatory stuff
         Transform doorsParent = new GameObject("Doors").transform;
@@ -197,8 +233,34 @@ public class SceneLoaderController : MonoBehaviour
         // build navigation on map
     }
 
+    public void saveScene()
+    {
+        saveSceneToJson("");
+    }
+
+    private void saveSceneToJson(string path)
+    {
+        // serialize all objects into SceneDescription and then save that as json
+
+        // update scene desciption based on scene state
+        // get all children of Doors
+        var doors = GameObject.Find("Doors").GetComponentsInChildren<Transform>();
+        var bars = GameObject.Find("Bars").GetComponentsInChildren<Transform>();
+        var tables = GameObject.Find("Tables").GetComponentsInChildren<Transform>();
+
+        sceneDescription.doorsPositions = doors.Select(x => Transformation.fromTransform(x)).ToList();
+        sceneDescription.barsPositions = bars.Select(x => Transformation.fromTransform(x)).ToList();
+        sceneDescription.tablesPositions = tables.Select(x => Transformation.fromTransform(x)).ToList();
+
+        
+
+
+
+
+    }
+
     // Remove remants of last loaded scene if any
-    private void CleanupScene()
+    public void cleanupScene()
     {
         // Every object on scene is a child of this one so we just need to destroy them all    
         for (int i = this.transform.childCount; i > 0; --i)

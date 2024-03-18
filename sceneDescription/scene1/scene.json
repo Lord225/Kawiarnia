@@ -2,11 +2,14 @@
   "name": "Hello World",
   "sizeX": 10,
   "sizeY": 10, 
-  "floorPosition": {
+  "floorObject": {
     "px": 25,
     "py": 1,
     "pz": 0,
-    "path": "C:/Resources/floor.obj",
+    "sx": -30,
+    "sy": 30,
+    "sz": 30,
+    "path": "C:/Users/Maciej/unityrepos/Kawiarnia/sceneDescription/scene1/floor.obj",
     "id": "035c7858-95db-45f3-b002-38538188845e"
     
   },
