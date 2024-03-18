@@ -9,7 +9,7 @@
     "sx": -30,
     "sy": 30,
     "sz": 30,
-    "path": "C:/Users/Maciej/unityrepos/Kawiarnia/sceneDescription/scene1/floor.obj",
+    "path": "floor.obj",
     "id": "035c7858-95db-45f3-b002-38538188845e"
     
   },
@@ -18,7 +18,7 @@
       "px": 20,
       "py": 0,
       "pz": 20,
-      "path": "C:/Resources/mushroom.obj",
+      "path": "flowers.obj",
       "id": "c9c92421-5138-46ee-a6d8-c3e832a2b962"
     }
   ],

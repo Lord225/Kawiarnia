@@ -10,6 +10,11 @@ using System.Linq;
 using JetBrains.Annotations;
 using Unity.AI.Navigation;
 using System.Xml.Xsl;
+using Unity.VisualScripting;
+
+//TODO
+// * Floor should be an child of object Loder (it is not)
+// * Prefab's models (bars, doors,...) should be external obj files from blender (one mesh)
 
 
 [CustomEditor(typeof(SceneLoaderController))]
@@ -61,19 +66,11 @@ public class Transformation
     {
         var result = new Transformation();
 
-        result.px = other.position.x;
-        result.py = other.position.y;
-        result.pz = other.position.z;
+        result.pos = other.position;
+        result.rot = other.rotation;
+        result.scale = other.localScale;
 
-        var euler = other.rotation.eulerAngles;
-
-        result.rx = euler.x;
-        result.ry = euler.y;
-        result.rz = euler.z;
-
-        result.sx = other.localScale.x;
-        result.sy = other.localScale.y;
-        result.sz = other.localScale.z;
+        result.id = other.name;
 
         return result;
     }
@@ -84,6 +81,12 @@ public class Transformation
         {
             return new Vector3(px, py, pz);
         }
+        set
+        {
+            this.px = value.x;
+            this.py = value.y;
+            this.pz = value.z;
+        }
     }
 
     public Quaternion rot
@@ -92,6 +95,12 @@ public class Transformation
         {
             return Quaternion.Euler(rx, ry, rz);
         }
+        set
+        {
+            this.rx = value.eulerAngles.x;
+            this.ry = value.eulerAngles.y;
+            this.rz = value.eulerAngles.z;
+        }
     }
 
     public Vector3 scale
@@ -99,6 +108,12 @@ public class Transformation
         get
         {
             return new Vector3(sx, sy, sz);
+        }
+        set
+        {
+            this.sx = value.x;
+            this.sy = value.y;
+            this.sz = value.z;
         }
     }
 }
@@ -197,12 +212,12 @@ public class SceneLoaderController : MonoBehaviour
 
         Transform floorParent = new GameObject("Floor").transform;
 
-        modelLoader.InitialzeModels(new List<DeployableObject> { sceneDescription.floorObject }, floorParent);
+        modelLoader.InitialzeModels(new List<DeployableObject> { sceneDescription.floorObject }, floorParent, sceneDescriptonPath);
 
         // prepere prefabs from loaded objects and place them.
         Debug.Log("Placing " + sceneDescription.objectsOnScreen.Count + " objects");
 
-        modelLoader.InitialzeModels(sceneDescription.objectsOnScreen, OOSParent.transform);
+        modelLoader.InitialzeModels(sceneDescription.objectsOnScreen, OOSParent.transform, sceneDescriptonPath);
         
 
         // place door prefabs and other mandatory stuff
@@ -238,12 +253,36 @@ public class SceneLoaderController : MonoBehaviour
         saveSceneToJson("");
     }
 
+    private string localPath(string absolutePath)
+    {
+        var projectPath = sceneDescriptonPath;
+
+        // strip projectPath from absolutePath
+        if (absolutePath.StartsWith(projectPath))
+        {
+            var local = absolutePath.Substring(projectPath.Length);
+            // strip from / on start (any amount)
+            while (local.StartsWith("/") || local.StartsWith("\\"))
+            {
+                local = local.Substring(1);
+            }
+
+            return local;
+        }
+        else
+        {
+            return absolutePath;
+        }
+    }
+
     private void saveSceneToJson(string path)
     {
         // serialize all objects into SceneDescription and then save that as json
 
         // update scene desciption based on scene state
         // get all children of Doors
+        // TODO GetComponentInChildren retruns also parent object so we need to skip this one first
+
         var doors = GameObject.Find("Doors").GetComponentsInChildren<Transform>();
         var bars = GameObject.Find("Bars").GetComponentsInChildren<Transform>();
         var tables = GameObject.Find("Tables").GetComponentsInChildren<Transform>();
@@ -252,11 +291,24 @@ public class SceneLoaderController : MonoBehaviour
         sceneDescription.barsPositions = bars.Select(x => Transformation.fromTransform(x)).ToList();
         sceneDescription.tablesPositions = tables.Select(x => Transformation.fromTransform(x)).ToList();
 
+        var objectsOnScreen = GameObject.Find("OOS").GetComponentsInChildren<DeployableObjectPath>();
+
+        sceneDescription.objectsOnScreen = objectsOnScreen.Select(x => new DeployableObject
+        {
+            path = localPath(x.path),
+            pos = x.GetComponent<Transform>().position,
+            rot = x.GetComponent<Transform>().rotation,
+            scale = x.GetComponent<Transform>().localScale,
+            id = x.name,
+        }).ToList();
+
+
+        // save to json
+        string json = JsonUtility.ToJson(sceneDescription, true);
+
+        Debug.Log(json);
         
-
-
-
-
+        // File.WriteAllText(path, json);
     }
 
     // Remove remants of last loaded scene if any
