@@ -3,8 +3,8 @@
   "sizeX": 10,
   "sizeY": 10, 
   "floorObject": {
-    "px": 25,
-    "py": 1,
+    "px": 0,
+    "py": 0,
     "pz": 0,
     "sx": -30,
     "sy": 30,

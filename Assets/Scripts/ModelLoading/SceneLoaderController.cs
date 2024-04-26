@@ -211,6 +211,8 @@ public class SceneLoaderController : MonoBehaviour
         OOSParent.parent = transform;
 
         Transform floorParent = new GameObject("Floor").transform;
+        floorParent.position = Vector3.zero;
+        floorParent.parent = transform;
 
         modelLoader.InitialzeModels(new List<DeployableObject> { sceneDescription.floorObject }, floorParent, sceneDescriptonPath);
 
