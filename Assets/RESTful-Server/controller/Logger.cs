@@ -43,7 +43,7 @@ namespace RESTfulHTTPServer.src.controller
 				} 
 				else 
 				{
-					Console.WriteLine(log);
+					//Console.WriteLine(log);
 				}
 			}
 		}

@@ -3,12 +3,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-
-public class DeployableObjectPath : MonoBehaviour
-{
-    public string path;
-}
-
 [Serializable]
 public class DeployableObject : Transformation
 {
