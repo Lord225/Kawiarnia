@@ -7,6 +7,7 @@ using UnityEngine;
 public class DeployableObject : Transformation
 {
     public string path;
+    public string mtlPath;
 }
 
 public class ModelLoader : MonoBehaviour
@@ -16,11 +17,12 @@ public class ModelLoader : MonoBehaviour
         foreach (var deployableObject in objectsToDeploy)
         {
             var path = projectPath + "\\" + deployableObject.path;
-            Debug.Log(path);
+            var mtlPath = projectPath + "\\" + deployableObject.mtlPath;
+
             if (System.IO.File.Exists(path))
             {
                 // Loading and initializing .obj at given path 
-                var loadedObj = new OBJLoader().Load(path);
+                var loadedObj = new OBJLoader().Load(path, mtlPath);
 
 
                 // Setting appropriate transform parameters
@@ -29,8 +31,13 @@ public class ModelLoader : MonoBehaviour
                 loadedObj.transform.localScale = deployableObject.scale;
                 loadedObj.transform.SetParent(parent);
 
-                // add path to this object's obj file for later serialization
-                loadedObj.AddComponent<DeployableObjectPath>().path = path;
+                // add path to this object's obj and mtl file for later serialization
+                var dop = loadedObj.AddComponent<DeployableObjectPath>();
+
+                dop.path = path;
+                dop.mtlPath = mtlPath;
+
+
 
                 // set object name to id
                 loadedObj.name = deployableObject.id;

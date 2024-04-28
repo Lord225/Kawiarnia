@@ -11,6 +11,7 @@ using JetBrains.Annotations;
 using Unity.AI.Navigation;
 using System.Xml.Xsl;
 using Unity.VisualScripting;
+using static UnityEditor.PlayerSettings;
 
 //TODO
 // * Floor should be an child of object Loder (it is not)
@@ -304,6 +305,7 @@ public class SceneLoaderController : MonoBehaviour
         sceneDescription.objectsOnScreen = objectsOnScreen.Select(x => new DeployableObject
         {
             path = x.path,
+            mtlPath = x.mtlPath,
             pos = x.GetComponent<Transform>().position,
             rot = x.GetComponent<Transform>().rotation,
             scale = x.GetComponent<Transform>().localScale,
@@ -317,21 +319,45 @@ public class SceneLoaderController : MonoBehaviour
         sceneDescription.floorObject = new DeployableObject
         {
             path = floor.GetComponent<DeployableObjectPath>().path,
+            mtlPath = floor.GetComponent<DeployableObjectPath>().mtlPath,
             pos = floor.position,
             rot = floor.rotation,
             scale = floor.localScale,
             id = floor.name,
         };
 
-        // copy all needed resources
-        List<String> alreadyCopied = new();
+        // copy all needed resources 
 
-        File.Copy(sceneDescription.floorObject.path, path + "\\" + StripPath(sceneDescription.floorObject.path));
-        sceneDescription.floorObject.path = StripPath(sceneDescription.floorObject.path);
+        List<String> alreadyCopiedObj = new();
+        List<String> alreadyCopiedMtl = new();
+
+        var floorPath = sceneDescription.floorObject.path;
+        alreadyCopiedObj.Add(floorPath);
+        File.Copy(floorPath, path + "\\" + StripPath(floorPath));
+        sceneDescription.floorObject.path = StripPath(floorPath);
+
+        var mtlFloorPath = sceneDescription.floorObject.mtlPath;
+        alreadyCopiedMtl.Add(mtlFloorPath);
+        File.Copy(mtlFloorPath, path + "\\" + StripPath(mtlFloorPath));
+        sceneDescription.floorObject.mtlPath = StripPath(mtlFloorPath);
+
+       
 
         foreach (var oos in sceneDescription.objectsOnScreen){
-            File.Copy(oos.path, path + "\\" + StripPath(oos.path));
-            oos.path = StripPath(oos.path);
+            // .obj
+            if (!alreadyCopiedObj.Contains(oos.path)) {
+                alreadyCopiedObj.Add(oos.path);
+                File.Copy(oos.path, path + "\\" + StripPath(oos.path));
+                oos.path = StripPath(oos.path);
+            }
+
+            // .mtl
+            if (!alreadyCopiedMtl.Contains(oos.mtlPath))
+            {
+                alreadyCopiedMtl.Add(oos.mtlPath);
+                File.Copy(oos.mtlPath, path + "\\" + StripPath(oos.mtlPath));
+                oos.mtlPath = StripPath(oos.mtlPath);
+            }
         }
 
         // save to json

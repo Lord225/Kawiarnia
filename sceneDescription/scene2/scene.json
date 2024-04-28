@@ -4,7 +4,7 @@
     "sizeY": 10.0,
     "floorObject": {
         "px": 0.0,
-        "py": -19.399999618530275,
+        "py": 0.0,
         "pz": 0.0,
         "rx": 0.0,
         "ry": 0.0,
@@ -13,12 +13,13 @@
         "sy": 30.0,
         "sz": 30.0,
         "id": "035c7858-95db-45f3-b002-38538188845e",
-        "path": "floor.obj"
+        "path": "floor.obj",
+        "mtlPath": "floor.mtl"
     },
     "objectsOnScreen": [
         {
             "px": 20.0,
-            "py": -19.700000762939454,
+            "py": 0.0,
             "pz": 20.0,
             "rx": 0.0,
             "ry": 0.0,
@@ -27,13 +28,14 @@
             "sy": 1.0,
             "sz": 1.0,
             "id": "c9c92421-5138-46ee-a6d8-c3e832a2b962",
-            "path": "flowers.obj"
+            "path": "flowers.obj",
+            "mtlPath": "flowers.mtl"
         }
     ],
     "doorsPositions": [
         {
             "px": 25.0,
-            "py": 10.359999656677246,
+            "py": 1.0,
             "pz": 0.0,
             "rx": 0.0,
             "ry": 0.0,

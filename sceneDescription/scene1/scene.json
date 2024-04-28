@@ -10,6 +10,7 @@
     "sy": 30,
     "sz": 30,
     "path": "floor.obj",
+    "mtlPath": "floor.mtl",
     "id": "035c7858-95db-45f3-b002-38538188845e"
     
   },
@@ -19,6 +20,7 @@
       "py": 0,
       "pz": 20,
       "path": "flowers.obj",
+      "mtlPath": "flowers.mtl",
       "id": "c9c92421-5138-46ee-a6d8-c3e832a2b962"
     }
   ],
