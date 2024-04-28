@@ -285,15 +285,23 @@ public class SceneLoaderController : MonoBehaviour
         // get all children of Doors
         // TODO GetComponentInChildren retruns also parent object so we need to skip this one first
 
-        var doors = GameObject.Find("Doors").GetComponentsInChildren<Transform>();
-        var bars = GameObject.Find("Bars").GetComponentsInChildren<Transform>();
-        var tables = GameObject.Find("Tables").GetComponentsInChildren<Transform>();
+        UUIDHandler handler = new();
+
+        Transform doorParent = GameObject.Find("Doors").GetComponent<Transform>();
+        var doors = doorParent.GetComponentsInChildren<Transform>().Where(t => t != doorParent && handler.IsUUIDValid(t.name));
+
+        Transform barParents = GameObject.Find("Bars").GetComponent<Transform>();
+        var bars = barParents.GetComponentsInChildren<Transform>().Where(t => t != barParents && handler.IsUUIDValid(t.name));
+
+        Transform tableParents = GameObject.Find("Tables").GetComponent<Transform>();
+        var tables = tableParents.GetComponentsInChildren<Transform>().Where(t => t != tableParents && handler.IsUUIDValid(t.name));
 
         sceneDescription.doorsPositions = doors.Select(x => Transformation.fromTransform(x)).ToList();
         sceneDescription.barsPositions = bars.Select(x => Transformation.fromTransform(x)).ToList();
         sceneDescription.tablesPositions = tables.Select(x => Transformation.fromTransform(x)).ToList();
 
-        var objectsOnScreen = GameObject.Find("OOS").GetComponentsInChildren<DeployableObjectPath>();
+        Transform objectsOnScreenParent = GameObject.Find("OOS").GetComponent<Transform>();
+        var objectsOnScreen = objectsOnScreenParent.GetComponentsInChildren<DeployableObjectPath>().Where(t => t != objectsOnScreenParent && handler.IsUUIDValid(t.name));
 
         sceneDescription.objectsOnScreen = objectsOnScreen.Select(x => new DeployableObject
         {
