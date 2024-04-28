@@ -152,11 +152,6 @@ public class SceneLoaderController : MonoBehaviour
     public GameObject tableObject;
 
 
-    public void loadScene()
-    {
-        this.loadScene("");
-    }
-
     public void loadScene(string path)
     {
         // getting back to clean state
@@ -254,33 +249,34 @@ public class SceneLoaderController : MonoBehaviour
         // build navigation on map
     }
 
-    public void saveScene()
+    private string StripPath(string path)
     {
-        this.saveScene("");
-    }
-
-    private string localPath(string absolutePath, string projectPath)
-    {
-        // strip projectPath from absolutePath
-        if (absolutePath.StartsWith(projectPath))
-        {
-            var local = absolutePath.Substring(projectPath.Length);
-            // strip from / on start (any amount)
-            while (local.StartsWith("/") || local.StartsWith("\\"))
-            {
-                local = local.Substring(1);
-            }
-
-            return local;
-        }
-        else
-        {
-            return absolutePath;
-        }
+        return path.Split('\\').Reverse().First();
     }
 
     public void saveScene(string path)
     {
+
+        // handling current state of chosen path
+        if (!Directory.Exists(path) || !Directory.EnumerateFileSystemEntries(path).Any()) {
+            Debug.Log("Saving to path: " + path);
+            System.IO.Directory.CreateDirectory(path);
+        }
+        else
+        {
+            Debug.Log("Overwriting files at path: " + path);
+            System.IO.DirectoryInfo di = new DirectoryInfo(path);
+
+            foreach (FileInfo file in di.GetFiles())
+            {
+                file.Delete();
+            }
+            foreach (DirectoryInfo dir in di.GetDirectories())
+            {
+                dir.Delete(true);
+            }
+        }
+
         // serialize all objects into SceneDescription and then save that as json
 
         // update scene desciption based on scene state
@@ -292,11 +288,11 @@ public class SceneLoaderController : MonoBehaviour
         Transform doorParent = GameObject.Find("Doors").GetComponent<Transform>();
         var doors = doorParent.GetComponentsInChildren<Transform>().Where(t => t != doorParent && handler.IsUUIDValid(t.name));
 
-        Transform barParents = GameObject.Find("Bars").GetComponent<Transform>();
-        var bars = barParents.GetComponentsInChildren<Transform>().Where(t => t != barParents && handler.IsUUIDValid(t.name));
+        Transform barParent = GameObject.Find("Bars").GetComponent<Transform>();
+        var bars = barParent.GetComponentsInChildren<Transform>().Where(t => t != barParent && handler.IsUUIDValid(t.name));
 
-        Transform tableParents = GameObject.Find("Tables").GetComponent<Transform>();
-        var tables = tableParents.GetComponentsInChildren<Transform>().Where(t => t != tableParents && handler.IsUUIDValid(t.name));
+        Transform tableParent = GameObject.Find("Tables").GetComponent<Transform>();
+        var tables = tableParent.GetComponentsInChildren<Transform>().Where(t => t != tableParent && handler.IsUUIDValid(t.name));
 
         sceneDescription.doorsPositions = doors.Select(x => Transformation.fromTransform(x)).ToList();
         sceneDescription.barsPositions = bars.Select(x => Transformation.fromTransform(x)).ToList();
@@ -307,20 +303,41 @@ public class SceneLoaderController : MonoBehaviour
 
         sceneDescription.objectsOnScreen = objectsOnScreen.Select(x => new DeployableObject
         {
-            path = localPath(x.path, path),
+            path = x.path,
             pos = x.GetComponent<Transform>().position,
             rot = x.GetComponent<Transform>().rotation,
             scale = x.GetComponent<Transform>().localScale,
             id = x.name,
         }).ToList();
 
+        Transform floorParent = GameObject.Find("Floor").GetComponent<Transform>();
+        var floor = floorParent.GetChild(0);
+
+
+        sceneDescription.floorObject = new DeployableObject
+        {
+            path = floor.GetComponent<DeployableObjectPath>().path,
+            pos = floor.position,
+            rot = floor.rotation,
+            scale = floor.localScale,
+            id = floor.name,
+        };
+
+        // copy all needed resources
+        List<String> alreadyCopied = new();
+
+        File.Copy(sceneDescription.floorObject.path, path + "\\" + StripPath(sceneDescription.floorObject.path));
+        sceneDescription.floorObject.path = StripPath(sceneDescription.floorObject.path);
+
+        foreach (var oos in sceneDescription.objectsOnScreen){
+            File.Copy(oos.path, path + "\\" + StripPath(oos.path));
+            oos.path = StripPath(oos.path);
+        }
 
         // save to json
         string json = JsonUtility.ToJson(sceneDescription, true);
 
-        Debug.Log(json);
-        
-        File.WriteAllText(path, json);
+        File.WriteAllText(path + @"\scene.json", json);
     }
 
     // Remove remants of last loaded scene if any
