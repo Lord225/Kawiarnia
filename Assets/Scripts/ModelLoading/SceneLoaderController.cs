@@ -20,6 +20,9 @@ using Unity.VisualScripting;
 [CustomEditor(typeof(SceneLoaderController))]
 public class SceneLoaderControllerEditor : Editor
 {
+    string pathToLoad = @"sceneDescription\scene1";
+    string pathToSave = "";
+
     public override void OnInspectorGUI()
     {
         base.OnInspectorGUI();
@@ -30,8 +33,9 @@ public class SceneLoaderControllerEditor : Editor
 
         if (GUILayout.Button("Load Scene"))
         {
-            loader.loadScene();
+            loader.loadScene(pathToLoad);
         }
+        pathToLoad = GUILayout.TextField(pathToLoad);
 
         if (GUILayout.Button("Clear"))
         {
@@ -40,8 +44,11 @@ public class SceneLoaderControllerEditor : Editor
 
         if (GUILayout.Button("Save Scene"))
         {
-            loader.saveScene();
+            loader.saveScene(pathToSave);
         }
+        pathToSave = GUILayout.TextField(pathToSave);
+
+
     }
 }
 
@@ -136,9 +143,6 @@ public class SceneDescription
 [RequireComponent(typeof(ModelLoader))]
 public class SceneLoaderController : MonoBehaviour
 {
-    // abs paths works too, if no abs path it will add project dir so sceneDescription\scene1 is enought.
-    public string sceneDescriptonPath = string.Empty;
-
     public SceneDescription sceneDescription;
 
     public ModelLoader modelLoader;
@@ -150,7 +154,7 @@ public class SceneLoaderController : MonoBehaviour
 
     public void loadScene()
     {
-        this.loadScene(sceneDescriptonPath);
+        this.loadScene("");
     }
 
     public void loadScene(string path)
@@ -159,7 +163,7 @@ public class SceneLoaderController : MonoBehaviour
         cleanupScene();
 
         // load file from disc
-        sceneDescription = loadFromJson(sceneDescriptonPath);
+        sceneDescription = loadFromJson(path);
 
         Debug.Log($"Loaded description of scene {sceneDescription.name}");
 
@@ -169,7 +173,7 @@ public class SceneLoaderController : MonoBehaviour
 
         // loadGlobalSettings();
 
-        prepereScene();
+        prepereScene(path);
 
     }
 
@@ -203,7 +207,7 @@ public class SceneLoaderController : MonoBehaviour
         return scene;
     }
 
-    private void prepereScene()
+    private void prepereScene(string path)
     {
         // create parent object for all OOS (Objects On Screen) for better categorization
         Transform OOSParent = new GameObject("OOS").transform;
@@ -214,12 +218,12 @@ public class SceneLoaderController : MonoBehaviour
         floorParent.position = Vector3.zero;
         floorParent.parent = transform;
 
-        modelLoader.InitialzeModels(new List<DeployableObject> { sceneDescription.floorObject }, floorParent, sceneDescriptonPath);
+        modelLoader.InitialzeModels(new List<DeployableObject> { sceneDescription.floorObject }, floorParent, path);
 
         // prepere prefabs from loaded objects and place them.
         Debug.Log("Placing " + sceneDescription.objectsOnScreen.Count + " objects");
 
-        modelLoader.InitialzeModels(sceneDescription.objectsOnScreen, OOSParent.transform, sceneDescriptonPath);
+        modelLoader.InitialzeModels(sceneDescription.objectsOnScreen, OOSParent.transform, path);
         
 
         // place door prefabs and other mandatory stuff
@@ -252,13 +256,11 @@ public class SceneLoaderController : MonoBehaviour
 
     public void saveScene()
     {
-        saveSceneToJson("");
+        this.saveScene("");
     }
 
-    private string localPath(string absolutePath)
+    private string localPath(string absolutePath, string projectPath)
     {
-        var projectPath = sceneDescriptonPath;
-
         // strip projectPath from absolutePath
         if (absolutePath.StartsWith(projectPath))
         {
@@ -277,7 +279,7 @@ public class SceneLoaderController : MonoBehaviour
         }
     }
 
-    private void saveSceneToJson(string path)
+    public void saveScene(string path)
     {
         // serialize all objects into SceneDescription and then save that as json
 
@@ -305,7 +307,7 @@ public class SceneLoaderController : MonoBehaviour
 
         sceneDescription.objectsOnScreen = objectsOnScreen.Select(x => new DeployableObject
         {
-            path = localPath(x.path),
+            path = localPath(x.path, path),
             pos = x.GetComponent<Transform>().position,
             rot = x.GetComponent<Transform>().rotation,
             scale = x.GetComponent<Transform>().localScale,
@@ -318,7 +320,7 @@ public class SceneLoaderController : MonoBehaviour
 
         Debug.Log(json);
         
-        // File.WriteAllText(path, json);
+        File.WriteAllText(path, json);
     }
 
     // Remove remants of last loaded scene if any
