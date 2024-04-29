@@ -130,8 +130,8 @@ public class Transformation
 public class SceneDescription
 {
     public string name;
-    public float sizeX;
-    public float sizeY;
+    public Vector2 boundBoxX;
+    public Vector2 boundBoxZ;
     public DeployableObject floorObject; //walkable surface (root for navmesh)
     public List<DeployableObject> objectsOnScreen; 
 
@@ -151,6 +151,24 @@ public class SceneLoaderController : MonoBehaviour
     public GameObject doorObject;
     public GameObject barObject;
     public GameObject tableObject;
+
+    public Vector2 boundBoxX
+    {
+        get
+        {
+            return sceneDescription.boundBoxX;
+        }
+    }
+
+    public Vector2 boundBoxZ
+    {
+        get
+        {
+            return sceneDescription.boundBoxZ;
+        }
+    }   
+
+
 
 
     public void loadScene(string path)
@@ -210,7 +228,8 @@ public class SceneLoaderController : MonoBehaviour
         OOSParent.position = Vector3.zero;
         OOSParent.parent = transform;
 
-        Transform floorParent = new GameObject("Floor").transform;
+        GameObject floor = new GameObject("Floor");
+        Transform floorParent = floor.transform;
         floorParent.position = Vector3.zero;
         floorParent.parent = transform;
 
@@ -247,7 +266,15 @@ public class SceneLoaderController : MonoBehaviour
         Debug.Log("Placing " + sceneDescription.tablesPositions.Count + " tables");
         modelLoader.InitializeGameObjects(tableObject, sceneDescription.tablesPositions, tablesParent);
 
+        var (x, z) = getBoundBox(floor);
+
+        sceneDescription.boundBoxX = x;
+        sceneDescription.boundBoxZ = z;
+
+
         // build navigation on map
+
+
     }
 
     private string StripPath(string path)
@@ -382,5 +409,19 @@ public class SceneLoaderController : MonoBehaviour
                 DestroyImmediate(this.transform.GetChild(0).gameObject);
             }
         }
+    }
+
+    public (Vector2, Vector2) getBoundBox(GameObject obj)
+    {
+        var renderer = obj.GetComponentsInChildren<Renderer>();
+        // get global bounds 
+        var rendererBounds = renderer.Select(x => x.bounds);
+
+        var bouds = rendererBounds.Aggregate((x, y) => { x.Encapsulate(y); return x; });
+
+        var x = new Vector2(bouds.min.x, bouds.max.x);
+        var z = new Vector2(bouds.min.z, bouds.max.z);
+
+        return (x, z);
     }
 }

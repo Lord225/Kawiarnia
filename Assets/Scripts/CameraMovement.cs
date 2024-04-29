@@ -32,6 +32,8 @@ public class CameraMovement : MonoBehaviour
     public bool isMouseBlocked { get; private set; }
     public float height { get; private set; }
 
+    public SceneLoaderController sceneDescription;
+
     private Vector3 MousePos;
     private float HeightMovmentSpeedBoost = 0;
     private float accy = 0;
@@ -78,6 +80,22 @@ public class CameraMovement : MonoBehaviour
 
         transform.position += Position;
         transform.position += Position2;
+
+        if(sceneDescription.sceneDescription != null)
+        {
+            // clamp to sceneDescription.boundsX and sceneDescription.boundsZ
+            transform.position = new Vector3(
+                            Mathf.Clamp(
+                                transform.position.x,
+                                sceneDescription.sceneDescription.boundBoxX.x,
+                                sceneDescription.sceneDescription.boundBoxX.y),
+                           transform.position.y,
+                           Mathf.Clamp(
+                                transform.position.z,
+                                sceneDescription.sceneDescription.boundBoxZ.x,
+                                sceneDescription.sceneDescription.boundBoxZ.y)
+                           );
+        }
 
         CameraPos.localPosition = new Vector3(CameraPos.localPosition.x, height, -height - 3);
 
