@@ -21,8 +21,9 @@ using static UnityEditor.PlayerSettings;
 [CustomEditor(typeof(SceneLoaderController))]
 public class SceneLoaderControllerEditor : Editor
 {
-    string pathToLoad = @"sceneDescription\scene1";
-    string pathToSave = "";
+    string basePath = @"sceneDescription\";
+    // TODO to persist this path it should be taken from loader!
+    [SerializeField] string pathToSave = string.Empty;
 
     public override void OnInspectorGUI()
     {
@@ -32,25 +33,46 @@ public class SceneLoaderControllerEditor : Editor
 
         GUILayout.Space(10);
 
+        basePath = GUILayout.TextField(basePath);
         if (GUILayout.Button("Load Scene"))
         {
-            loader.loadScene(pathToLoad);
+            pathToSave = EditorUtility.OpenFolderPanel("Choose folder with scene description", basePath, "");
+
+            if (pathToSave == "") return;
+
+            loader.loadScene(pathToSave);
         }
-        pathToLoad = GUILayout.TextField(pathToLoad);
 
         if (GUILayout.Button("Clear"))
         {
             loader.cleanupScene();
         }
 
+        if (GUILayout.Button("Build Navigation"))
+        {
+            loader.buildNavigation();
+        }
+
+        pathToSave = GUILayout.TextField(pathToSave);
         if (GUILayout.Button("Save Scene"))
         {
             loader.saveScene(pathToSave);
         }
-        pathToSave = GUILayout.TextField(pathToSave);
 
+        if (GUILayout.Button("Save as"))
+        {
+            var path = EditorUtility.SaveFolderPanel("Choose folder to save scene", basePath, "");
+
+            if (path == "") return;
+
+            pathToSave = path;
+
+            loader.saveScene(pathToSave);
+        }
 
     }
+
+
 }
 
 [Serializable]
@@ -273,6 +295,32 @@ public class SceneLoaderController : MonoBehaviour
 
 
         // build navigation on map
+        buildNavigation();
+
+    }
+
+    public void buildNavigation()
+    {
+        // get floor object
+        Transform floorParent = GameObject.Find("Floor").GetComponent<Transform>();
+
+        var floor = floorParent.GetChild(0);
+
+        // try taking NavMeshSurface if not present add it
+        var hasNavmesh = floor.TryGetComponent<NavMeshSurface>(out NavMeshSurface navMeshSurface);
+
+        if (!hasNavmesh)
+        {
+            navMeshSurface = floor.gameObject.AddComponent<NavMeshSurface>();
+        }
+
+        // set up navmesh
+        navMeshSurface.collectObjects = CollectObjects.All;
+
+
+        navMeshSurface.BuildNavMesh();
+
+ 
 
 
     }
@@ -280,6 +328,32 @@ public class SceneLoaderController : MonoBehaviour
     private string StripPath(string path)
     {
         return path.Split('\\').Reverse().First();
+    }
+
+    private void CopyFile(string src, string dsc)
+    {
+        // check if file exists
+        if (!File.Exists(src))
+        {
+            Debug.LogError("File does not exist: " + src);
+            return;
+        }
+
+        // check if src is same as dsc
+        if (Path.GetFullPath(src) == Path.GetFullPath(dsc))
+        {
+            return;
+        }
+
+        // if dsc exists delete it
+        if (File.Exists(dsc))
+        {
+            File.Delete(dsc);
+        }
+
+
+        // copy file
+        File.Copy(src, dsc);
     }
 
     public void saveScene(string path)
@@ -292,17 +366,17 @@ public class SceneLoaderController : MonoBehaviour
         }
         else
         {
-            Debug.Log("Overwriting files at path: " + path);
-            System.IO.DirectoryInfo di = new DirectoryInfo(path);
+            //Debug.Log("Overwriting files at path: " + path);
+            //System.IO.DirectoryInfo di = new DirectoryInfo(path);
 
-            foreach (FileInfo file in di.GetFiles())
-            {
-                file.Delete();
-            }
-            foreach (DirectoryInfo dir in di.GetDirectories())
-            {
-                dir.Delete(true);
-            }
+            //foreach (FileInfo file in di.GetFiles())
+            //{
+            //    file.Delete();
+            //}
+            //foreach (DirectoryInfo dir in di.GetDirectories())
+            //{
+            //    dir.Delete(true);
+            //}
         }
 
         // serialize all objects into SceneDescription and then save that as json
@@ -360,12 +434,12 @@ public class SceneLoaderController : MonoBehaviour
 
         var floorPath = sceneDescription.floorObject.path;
         alreadyCopiedObj.Add(floorPath);
-        File.Copy(floorPath, path + "\\" + StripPath(floorPath));
+        CopyFile(floorPath, path + "\\" + StripPath(floorPath));
         sceneDescription.floorObject.path = StripPath(floorPath);
 
         var mtlFloorPath = sceneDescription.floorObject.mtlPath;
         alreadyCopiedMtl.Add(mtlFloorPath);
-        File.Copy(mtlFloorPath, path + "\\" + StripPath(mtlFloorPath));
+        CopyFile(mtlFloorPath, path + "\\" + StripPath(mtlFloorPath));
         sceneDescription.floorObject.mtlPath = StripPath(mtlFloorPath);
 
        
@@ -374,7 +448,7 @@ public class SceneLoaderController : MonoBehaviour
             // .obj
             if (!alreadyCopiedObj.Contains(oos.path)) {
                 alreadyCopiedObj.Add(oos.path);
-                File.Copy(oos.path, path + "\\" + StripPath(oos.path));
+                CopyFile(oos.path, path + "\\" + StripPath(oos.path));
                 oos.path = StripPath(oos.path);
             }
 
@@ -382,7 +456,7 @@ public class SceneLoaderController : MonoBehaviour
             if (!alreadyCopiedMtl.Contains(oos.mtlPath))
             {
                 alreadyCopiedMtl.Add(oos.mtlPath);
-                File.Copy(oos.mtlPath, path + "\\" + StripPath(oos.mtlPath));
+                CopyFile(oos.mtlPath, path + "\\" + StripPath(oos.mtlPath));
                 oos.mtlPath = StripPath(oos.mtlPath);
             }
         }
@@ -414,7 +488,7 @@ public class SceneLoaderController : MonoBehaviour
     public (Vector2, Vector2) getBoundBox(GameObject obj)
     {
         var renderer = obj.GetComponentsInChildren<Renderer>();
-        // get global bounds 
+
         var rendererBounds = renderer.Select(x => x.bounds);
 
         var bouds = rendererBounds.Aggregate((x, y) => { x.Encapsulate(y); return x; });
