@@ -33,6 +33,11 @@ public class SceneLoaderControllerEditor : Editor
 
         GUILayout.Space(10);
 
+        if (loader.loadPath != string.Empty)
+        {
+            pathToSave = loader.loadPath;
+        }
+
         basePath = GUILayout.TextField(basePath);
         if (GUILayout.Button("Load Scene"))
         {
@@ -166,6 +171,7 @@ public class SceneDescription
 [RequireComponent(typeof(ModelLoader))]
 public class SceneLoaderController : MonoBehaviour
 {
+    public string loadPath = string.Empty;
     public SceneDescription sceneDescription;
 
     public ModelLoader modelLoader;
@@ -235,7 +241,7 @@ public class SceneLoaderController : MonoBehaviour
             Debug.LogError("File does not exist: " + path);
             return null;
         }
-
+        
         var file = File.ReadAllText(path);
         
         var scene = JsonUtility.FromJson<SceneDescription>(file);
@@ -358,9 +364,15 @@ public class SceneLoaderController : MonoBehaviour
 
     public void saveScene(string path)
     {
+        // check if path is pointing to json file, if so strip to directory
+        if (Path.GetFileName(path).EndsWith(".json"))
+        {
+            path = Path.GetDirectoryName(path);
+        }
+
 
         // handling current state of chosen path
-        if (!Directory.Exists(path) || !Directory.EnumerateFileSystemEntries(path).Any()) {
+        if ((!Directory.Exists(path) || !Directory.EnumerateFileSystemEntries(path).Any())) {
             Debug.Log("Saving to path: " + path);
             System.IO.Directory.CreateDirectory(path);
         }
