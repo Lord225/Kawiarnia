@@ -90,14 +90,36 @@ public class ClientScript : MonoBehaviour
         }
     }
 
+    void findWaiter()
+    {
+        var waiter = GameObject.Find("Waiters");
+
+        if (waiter == null)
+        {
+            Debug.LogError("Waiters object not found");
+            return;
+        }
+
+        var waiters = waiter.GetComponentsInChildren<WaiterScript>();
+
+        // ask free random waiter to take order
+
+
+
+
+
+    }
+
     public enum AgentState
     {
-        WantsTable,
+        WantsTable, 
         GoingToTable,
-        WantsToOrder,
+        WantsToOrder, // client is about to go to counter or waiter
         GoingToCounter,
         Wardering,
-        Ordering,
+        WantsWaiter, // client waits for waiter to take order
+        Ordering, // client is ordering
+        TakingOrder, // client is taking order
         Eating,
         Leaving,
     }
@@ -119,7 +141,24 @@ public class ClientScript : MonoBehaviour
         }
         if(state == AgentState.WantsToOrder)
         {
-            findCounter();
+            float rnd = UnityEngine.Random.Range(0, 1);
+
+            if (rnd < 0.5)
+            {
+                findCounter();
+            }
+            else
+            {
+                findWaiter();
+            }
+        }
+
+        if (state == AgentState.GoingToCounter)
+        {
+            if (isDone())
+            {
+                state = AgentState.Ordering;
+            }
         }
     }
 
