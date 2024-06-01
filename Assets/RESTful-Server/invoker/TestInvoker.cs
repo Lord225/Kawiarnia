@@ -28,17 +28,40 @@ using RESTfulHTTPServer.src.controller;
 
 namespace RESTfulHTTPServer.src.invoker
 {
+    public class ClientInfo
+    {
+        public string doorId = "";
+        public int count = 0;
+
+        public float minSpeed;
+        public float maxSpeed;
+
+        public int minOrderSize;
+        public int maxOrderSize;
+
+        public string preferedTable;
+    }
+
     public class TestInvoker
     {
         public static Response AddClient(Request request)
         {
             Response response = new();
             string responseData = "";
-            int doorId = 0;
+            ClientInfo clientInfo = new ClientInfo();
 
             try
             {
-                doorId = Int32.Parse(request.GetParameter("id"));
+                clientInfo.doorId = request.GetParameter("doorId");
+                clientInfo.count = Int32.Parse(request.GetParameter("count"));
+
+                clientInfo.minSpeed = float.Parse(request.GetParameter("minSpeed"));
+                clientInfo.maxSpeed = float.Parse(request.GetParameter("maxSpeed"));
+
+                clientInfo.minOrderSize = Int32.Parse(request.GetParameter("minOrderSize"));
+                clientInfo.maxOrderSize = Int32.Parse(request.GetParameter("maxOrderSize"));
+
+                clientInfo.preferedTable = request.GetParameter("tabkleId");
             }
             catch (FormatException)
             {
@@ -49,28 +72,24 @@ namespace RESTfulHTTPServer.src.invoker
 
             UnityInvoker.ExecuteOnMainThread.Enqueue(() =>
             {
-                SceneLoaderController SLC = GameObject.Find("ObjectLoader").GetComponent<SceneLoaderController>();
+                AddClient addClient = GameObject.Find("AddClient").GetComponent<AddClient>();
+                addClient.Spawn(clientInfo);
 
-
-                if (SLC.sceneDescription.doorsPositions.Count <= doorId)
-                {
-                    responseData = "403";
-                    response.SetContent("403");
-                    response.SetHTTPStatusCode(403);
-                }
-                else
-                {
-                    AddClient addClient = GameObject.Find("AddClient").GetComponent<AddClient>();
-                    addClient.Spawn(doorId);
-
-                    responseData = "200";
-                    response.SetContent("200");
-                    response.SetHTTPStatusCode(200);
-                }
+                responseData = "200";
+                response.SetContent("200");
+                response.SetHTTPStatusCode(200);
             });
 
             while (responseData.Equals("")) { }
 
+            return response;
+        }
+
+        public static Response AlterSettings()
+        {
+            Response response = new();
+            response.SetContent("404");
+            response.SetHTTPStatusCode(404);
             return response;
         }
     }

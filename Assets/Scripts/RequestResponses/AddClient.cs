@@ -1,3 +1,5 @@
+using RESTfulHTTPServer.src.invoker;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,15 +7,10 @@ using UnityEngine;
 public class AddClient : MonoBehaviour
 {
     public GameObject client;
-    private Transform doorParent;
 
-    public void Spawn(int doorId)
+    public void Spawn(ClientInfo info)
     {
-        if (doorParent == null)
-        {
-            doorParent = GameObject.Find("Doors").transform;
-        }
-        Vector3 pos = doorParent.GetChild(doorId).position;
-        Instantiate(client, pos, Quaternion.identity);
+        Vector3 dp = GameObject.Find(info.doorId).transform.position;
+        GameObject newObject = Instantiate(client, dp, Quaternion.identity);
     }
 }

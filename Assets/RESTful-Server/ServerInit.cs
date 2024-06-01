@@ -50,10 +50,11 @@ public class ServerInit : MonoBehaviour
 		// HTTP Type     - /foo/bar/{variable}   			- DelegetorClass.MethodToBeCalled
 		RoutingManager routingManager = new RoutingManager();
 		routingManager.AddRoute(new Route(Route.Type.GET, "/add-client/{id}", "TestInvoker.AddClient"));
+        routingManager.AddRoute(new Route(Route.Type.GET, "/alter-settings/{id}", "TestInvoker.AlterSettings"));
 
-		// Starts the Simple REST Server
-		// With or without basic authorisation flag
-		if (!username.Equals("") && !password.Equals(""))
+        // Starts the Simple REST Server
+        // With or without basic authorisation flag
+        if (!username.Equals("") && !password.Equals(""))
 		{
 			RESTfulHTTPServer.src.controller.Logger.Log(TAG, "Create basic auth");
 			BasicAuth basicAuth = new BasicAuth(username, password);
