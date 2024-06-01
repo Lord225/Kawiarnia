@@ -49,8 +49,8 @@ public class ServerInit : MonoBehaviour
 		// HTTP Type 	 - URL routing path with variables 	- Class and method to be called
 		// HTTP Type     - /foo/bar/{variable}   			- DelegetorClass.MethodToBeCalled
 		RoutingManager routingManager = new RoutingManager();
-		routingManager.AddRoute(new Route(Route.Type.GET, "/add-client/{id}", "TestInvoker.AddClient"));
-        routingManager.AddRoute(new Route(Route.Type.GET, "/alter-settings/{id}", "TestInvoker.AlterSettings"));
+		routingManager.AddRoute(new Route(Route.Type.POST, "/add-client", "TestInvoker.AddClient"));
+        routingManager.AddRoute(new Route(Route.Type.POST, "/alter-settings", "TestInvoker.AlterSettings"));
 
         // Starts the Simple REST Server
         // With or without basic authorisation flag

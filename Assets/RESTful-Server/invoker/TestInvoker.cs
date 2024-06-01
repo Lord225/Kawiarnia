@@ -26,22 +26,25 @@ using System.Net;
 using RESTfulHTTPServer.src.models;
 using RESTfulHTTPServer.src.controller;
 
+public class ClientInfo
+{
+    public string doorId = "";
+    public int count = 0;
+
+    public float minSpeed;
+    public float maxSpeed;
+
+    public int minOrderSize;
+    public int maxOrderSize;
+
+    public int minPatience;
+    public int maxPatience;
+
+    public string preferedTable;
+}
+
 namespace RESTfulHTTPServer.src.invoker
 {
-    public class ClientInfo
-    {
-        public string doorId = "";
-        public int count = 0;
-
-        public float minSpeed;
-        public float maxSpeed;
-
-        public int minOrderSize;
-        public int maxOrderSize;
-
-        public string preferedTable;
-    }
-
     public class TestInvoker
     {
         public static Response AddClient(Request request)
@@ -50,18 +53,11 @@ namespace RESTfulHTTPServer.src.invoker
             string responseData = "";
             ClientInfo clientInfo = new ClientInfo();
 
+            Debug.Log("callin");
+
             try
             {
-                clientInfo.doorId = request.GetParameter("doorId");
-                clientInfo.count = Int32.Parse(request.GetParameter("count"));
-
-                clientInfo.minSpeed = float.Parse(request.GetParameter("minSpeed"));
-                clientInfo.maxSpeed = float.Parse(request.GetParameter("maxSpeed"));
-
-                clientInfo.minOrderSize = Int32.Parse(request.GetParameter("minOrderSize"));
-                clientInfo.maxOrderSize = Int32.Parse(request.GetParameter("maxOrderSize"));
-
-                clientInfo.preferedTable = request.GetParameter("tabkleId");
+                clientInfo = JsonUtility.FromJson<ClientInfo>(request.GetPOSTData());
             }
             catch (FormatException)
             {
@@ -85,8 +81,9 @@ namespace RESTfulHTTPServer.src.invoker
             return response;
         }
 
-        public static Response AlterSettings()
+        public static Response AlterSettings(Request request)
         {
+            Debug.Log("altered carbon");
             Response response = new();
             response.SetContent("404");
             response.SetHTTPStatusCode(404);
