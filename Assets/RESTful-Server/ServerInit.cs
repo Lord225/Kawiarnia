@@ -51,6 +51,8 @@ public class ServerInit : MonoBehaviour
 		RoutingManager routingManager = new RoutingManager();
 		routingManager.AddRoute(new Route(Route.Type.POST, "/add-client", "TestInvoker.AddClient"));
         routingManager.AddRoute(new Route(Route.Type.POST, "/alter-settings", "TestInvoker.AlterSettings"));
+        routingManager.AddRoute(new Route(Route.Type.GET, "/load/{id}", "TestInvoker.GetLoad"));
+        routingManager.AddRoute(new Route(Route.Type.GET, "/stats", "TestInvoker.GetStats"));
 
         // Starts the Simple REST Server
         // With or without basic authorisation flag

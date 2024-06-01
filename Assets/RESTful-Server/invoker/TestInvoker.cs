@@ -50,6 +50,21 @@ public class AlterInfo
     public float maxBaristaSpeed = 4;
 }
 
+public class Load
+{
+    public int clientsInTime = 0;
+    public int idleTime = 0;
+    //smth else per table/bar?
+}
+
+public class Stats
+{
+    public int drinksServed = 0;
+    public int grossIncome = 0;
+    public int idleBaristaTime = 0;
+    //smth else per whole coffee?
+}
+
 namespace RESTfulHTTPServer.src.invoker
 {
     public class TestInvoker
@@ -57,7 +72,7 @@ namespace RESTfulHTTPServer.src.invoker
         public static Response AddClient(Request request)
         {
             Response response = new();
-            string responseData = "";
+            bool responseMade = false;
             ClientInfo clientInfo = new ClientInfo();
 
             try
@@ -87,19 +102,19 @@ namespace RESTfulHTTPServer.src.invoker
 
                 if (returnCode == 0)
                 {
-                    responseData = "200";
                     response.SetContent("200");
                     response.SetHTTPStatusCode(200);
+                    responseMade = true;
                 }
                 else
                 {
-                    responseData = "403";
                     response.SetContent("403");
                     response.SetHTTPStatusCode(403);
+                    responseMade = true;
                 }
             });
 
-            while (responseData.Equals("")) { }
+            while (!responseMade) { }
 
             return response;
         }
@@ -107,7 +122,7 @@ namespace RESTfulHTTPServer.src.invoker
         public static Response AlterSettings(Request request)
         {
             Response response = new();
-            string responseData = "";
+            bool responseMade = false;
             AlterInfo alterInfo = new AlterInfo();
 
             try
@@ -116,7 +131,6 @@ namespace RESTfulHTTPServer.src.invoker
             }
             catch (FormatException)
             {
-                responseData = "404";
                 response.SetContent("404");
                 response.SetHTTPStatusCode(404);
                 return response;
@@ -124,7 +138,6 @@ namespace RESTfulHTTPServer.src.invoker
 
             if (alterInfo.baristaCount < 0)
             {
-                responseData = "403";
                 response.SetContent("403");
                 response.SetHTTPStatusCode(403);
                 return response;
@@ -134,12 +147,71 @@ namespace RESTfulHTTPServer.src.invoker
             {
                 //TODO: do something with the settings here
 
-                responseData = "200";
                 response.SetContent("200");
                 response.SetHTTPStatusCode(200);
+                responseMade = true;
             });
 
-            while (responseData.Equals("")) { }
+            while (!responseMade) { }
+
+            return response;
+        }
+
+        public static Response GetLoad(Request request)
+        {
+            Debug.Log("load");
+            Response response = new();
+            bool responseMade = false;
+            string id = "";
+            Load load = new();
+
+            UnityInvoker.ExecuteOnMainThread.Enqueue(() =>
+            {
+                GameObject door = GameObject.Find(id);
+
+                if (door != null)
+                {
+                    response.SetContent("403");
+                    response.SetHTTPStatusCode(403);
+                    responseMade = true;
+                }
+                else
+                {
+                    //TODO: set some actuall load data
+                    
+
+                    string content = JsonUtility.ToJson(load);
+
+                    response.SetContent(content);
+                    response.SetHTTPStatusCode(200);
+                    responseMade = true;
+                }
+            });
+
+            while (!responseMade) { }
+
+            return response;
+        }
+
+        public static Response GetStats(Request request)
+        {
+            Response response = new();
+            bool responseMade = false;
+
+            Stats stats = new();
+
+            UnityInvoker.ExecuteOnMainThread.Enqueue(() =>
+            {
+                //TODO: get some real statistics here
+                
+                string content = JsonUtility.ToJson(stats);
+
+                response.SetContent(content);
+                response.SetHTTPStatusCode(200);
+                responseMade = true;
+            });
+
+            while (!responseMade) { }
 
             return response;
         }
