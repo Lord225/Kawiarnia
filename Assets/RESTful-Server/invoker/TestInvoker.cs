@@ -33,7 +33,6 @@ public class ClientInfo
 
     public float minSpeed = 6;
     public float maxSpeed = 6;
-
     public int minOrderSize = 1;
     public int maxOrderSize = 1;
 
@@ -41,6 +40,14 @@ public class ClientInfo
     public int maxPatience = 10;
 
     public string preferedTable = "";
+}
+
+public class AlterInfo
+{
+    public int baristaCount = 1;
+
+    public float minBaristaSpeed = 4;
+    public float maxBaristaSpeed = 4;
 }
 
 namespace RESTfulHTTPServer.src.invoker
@@ -65,7 +72,7 @@ namespace RESTfulHTTPServer.src.invoker
             }
 
             // if no door ID was provided then no spawn is possible
-            if (clientInfo.doorId == "")
+            if (clientInfo.doorId == "" || clientInfo.count < 0)
             {
                 response.SetContent("403");
                 response.SetHTTPStatusCode(403);
@@ -99,10 +106,41 @@ namespace RESTfulHTTPServer.src.invoker
 
         public static Response AlterSettings(Request request)
         {
-            Debug.Log("altered carbon");
             Response response = new();
-            response.SetContent("404");
-            response.SetHTTPStatusCode(404);
+            string responseData = "";
+            AlterInfo alterInfo = new AlterInfo();
+
+            try
+            {
+                alterInfo = JsonUtility.FromJson<AlterInfo>(request.GetPOSTData());
+            }
+            catch (FormatException)
+            {
+                responseData = "404";
+                response.SetContent("404");
+                response.SetHTTPStatusCode(404);
+                return response;
+            }
+
+            if (alterInfo.baristaCount < 0)
+            {
+                responseData = "403";
+                response.SetContent("403");
+                response.SetHTTPStatusCode(403);
+                return response;
+            }
+
+            UnityInvoker.ExecuteOnMainThread.Enqueue(() =>
+            {
+                //TODO: do something with the settings here
+
+                responseData = "200";
+                response.SetContent("200");
+                response.SetHTTPStatusCode(200);
+            });
+
+            while (responseData.Equals("")) { }
+
             return response;
         }
     }
