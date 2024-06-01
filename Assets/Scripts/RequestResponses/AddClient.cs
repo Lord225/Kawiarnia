@@ -9,19 +9,32 @@ public class AddClient : MonoBehaviour
 {
     public GameObject client;
 
-    public void Spawn(ClientInfo info)
+    public int Spawn(ClientInfo info)
     {
-        Vector3 dp = GameObject.Find(info.doorId).transform.position;
+        GameObject door = GameObject.Find(info.doorId);
+
+        if (door == null)
+            return 1;
+
+        Vector3 dp = door.transform.position;
 
         // delay or some random burst while spawning??
         for (int i = 0; i < info.count; i++) {
             GameObject newObject = Instantiate(client, dp, Quaternion.identity);
 
             NavMeshAgent agent = newObject.GetComponent<NavMeshAgent>();
-            agent.speed = UnityEngine.Random.Range(info.minSpeed, info.maxSpeed);
+
+            if(agent != null )
+                agent.speed = UnityEngine.Random.Range(info.minSpeed, info.maxSpeed);
 
             ClientScript script = newObject.GetComponent<ClientScript>();
-            script.patience = UnityEngine.Random.Range(info.minPatience, info.maxPatience);
+
+            if (script != null)
+                script.patience = UnityEngine.Random.Range(info.minPatience, info.maxPatience);
+
+            
         }
+
+        return 0;
     }
 }

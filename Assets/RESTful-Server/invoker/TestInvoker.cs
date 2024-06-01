@@ -29,18 +29,18 @@ using RESTfulHTTPServer.src.controller;
 public class ClientInfo
 {
     public string doorId = "";
-    public int count = 0;
+    public int count = 1;
 
-    public float minSpeed;
-    public float maxSpeed;
+    public float minSpeed = 6;
+    public float maxSpeed = 6;
 
-    public int minOrderSize;
-    public int maxOrderSize;
+    public int minOrderSize = 1;
+    public int maxOrderSize = 1;
 
-    public int minPatience;
-    public int maxPatience;
+    public int minPatience = 10;
+    public int maxPatience = 10;
 
-    public string preferedTable;
+    public string preferedTable = "";
 }
 
 namespace RESTfulHTTPServer.src.invoker
@@ -53,8 +53,6 @@ namespace RESTfulHTTPServer.src.invoker
             string responseData = "";
             ClientInfo clientInfo = new ClientInfo();
 
-            Debug.Log("callin");
-
             try
             {
                 clientInfo = JsonUtility.FromJson<ClientInfo>(request.GetPOSTData());
@@ -66,14 +64,32 @@ namespace RESTfulHTTPServer.src.invoker
                 return response;
             }
 
+            // if no door ID was provided then no spawn is possible
+            if (clientInfo.doorId == "")
+            {
+                response.SetContent("403");
+                response.SetHTTPStatusCode(403);
+                return response;
+            }
+
+
             UnityInvoker.ExecuteOnMainThread.Enqueue(() =>
             {
                 AddClient addClient = GameObject.Find("AddClient").GetComponent<AddClient>();
-                addClient.Spawn(clientInfo);
+                int returnCode = addClient.Spawn(clientInfo);
 
-                responseData = "200";
-                response.SetContent("200");
-                response.SetHTTPStatusCode(200);
+                if (returnCode == 0)
+                {
+                    responseData = "200";
+                    response.SetContent("200");
+                    response.SetHTTPStatusCode(200);
+                }
+                else
+                {
+                    responseData = "403";
+                    response.SetContent("403");
+                    response.SetHTTPStatusCode(403);
+                }
             });
 
             while (responseData.Equals("")) { }
