@@ -8,6 +8,10 @@ using UnityEngine.AI;
 public class ClientScript : MonoBehaviour
 {
     private NavMeshAgent agent;
+    private Animator animator;
+    private CounterScript.Order order;
+
+
     bool isDone()
     {
         if (!agent.pathPending)
@@ -90,24 +94,37 @@ public class ClientScript : MonoBehaviour
         }
     }
 
-    void findWaiter()
+    bool findWaiter()
     {
         var waiter = GameObject.Find("Waiters");
 
         if (waiter == null)
         {
             Debug.LogError("Waiters object not found");
-            return;
+            return false;
         }
 
         var waiters = waiter.GetComponentsInChildren<WaiterScript>();
 
         // ask free random waiter to take order
 
+       foreach (var w in waiters)
+       {
+            if(w.askForService(this)) {
+                return true;
+            }
+       }
+        return false;
+    }
 
-
-
-
+    public void orderReady(CounterScript counter)
+    {
+        // check if we are waiting for order
+        if (state == AgentState.Wardering)
+        {
+            state = AgentState.GoingForOrder;
+            agent.SetDestination(counter.target.position);
+        }
     }
 
     public enum AgentState
@@ -116,11 +133,12 @@ public class ClientScript : MonoBehaviour
         GoingToTable,
         WantsToOrder, // client is about to go to counter or waiter
         GoingToCounter,
+        GoingForOrder,
         Wardering,
         WantsWaiter, // client waits for waiter to take order
-        Ordering, // client is ordering
+        Ordering,    // client is ordering
         TakingOrder, // client is taking order
-        Eating,
+        Eating,      
         Leaving,
     }
 
@@ -130,6 +148,7 @@ public class ClientScript : MonoBehaviour
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
+        animator = GetComponent<Animator>();
     }
 
     // dont change state here.
@@ -139,26 +158,22 @@ public class ClientScript : MonoBehaviour
         {
             findTable();
         }
-        if(state == AgentState.WantsToOrder)
-        {
-            float rnd = UnityEngine.Random.Range(0, 1);
 
-            if (rnd < 0.5)
-            {
-                findCounter();
-            }
-            else
-            {
-                findWaiter();
-            }
+        if (state == AgentState.Eating)
+        {
+            animator.Play("Eating");
         }
 
-        if (state == AgentState.GoingToCounter)
+        if (state == AgentState.Leaving)
         {
-            if (isDone())
-            {
-                state = AgentState.Ordering;
-            }
+            // find closest door
+            var doors = GameObject.Find("Doors").GetComponentsInChildren<DoorScript>();
+
+            Func<Vector3, float> heuristic = (Vector3 pos) => Vector3.Distance(pos, transform.position) + UnityEngine.Random.Range(0, 1);
+            
+            var targets = doors.OrderBy(c => heuristic(c.transform.position));
+            
+            agent.SetDestination(targets.First().transform.position);
         }
     }
 
@@ -180,11 +195,71 @@ public class ClientScript : MonoBehaviour
             }
         }
 
-        if (state == AgentState.WantsToOrder && counter != null)
+        if (state == AgentState.WantsToOrder)
         {
-            state = AgentState.GoingToCounter;
-            agent.SetDestination(counter.target.position);
-            agent.stoppingDistance = 1;
+            float rnd = UnityEngine.Random.Range(0, 1);
+
+            if (rnd < 0.1)
+            {
+                findCounter();
+                state = AgentState.GoingToCounter;
+                agent.SetDestination(counter.target.position);
+                agent.stoppingDistance = 1;
+            }
+            else
+            {
+                if(findWaiter())
+                {
+                    state = AgentState.WantsWaiter;
+                }
+            }
+        }
+
+
+        if (state == AgentState.GoingToCounter)
+        {
+            if (isDone())
+            {
+                state = AgentState.Ordering;
+            }
+        }
+
+        if(state == AgentState.Ordering)
+        {
+            if (isDone())
+            {
+                counter.addOrder(this);
+                state = AgentState.Wardering;
+            }
+        }
+
+        if (state == AgentState.Eating)
+        {
+            if (animator.GetCurrentAnimatorStateInfo(0).normalizedTime > 1 && !animator.IsInTransition(0))
+            {
+                state = AgentState.Leaving;
+            }
+        }
+
+        if (state == AgentState.Leaving)
+        {
+            if (isDone())
+            {
+                Destroy(gameObject);
+            }
+        }
+
+        if (state == AgentState.GoingForOrder)
+        {
+            if (isDone())
+            {
+                // get order
+                order = counter.takeOrder(this);
+                // go to table
+                agent.SetDestination(table.transform.position);
+                state = AgentState.GoingToTable;
+
+            }
         }
     }
 

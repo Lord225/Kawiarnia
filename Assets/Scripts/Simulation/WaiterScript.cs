@@ -13,7 +13,7 @@ public class WaiterScript : MonoBehaviour
     {
         Idle,
         Serving,
-        Baristing
+        Baristing,
     }
 
     public State state = State.Idle;
@@ -58,6 +58,11 @@ public class WaiterScript : MonoBehaviour
             return this;
         }
         return null;
+    }
+
+    void serveClient()
+    {
+        
     }
 
     // Start is called before the first frame update
