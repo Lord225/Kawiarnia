@@ -66,6 +66,7 @@ public class ClientScript : MonoBehaviour
                 // Found a table
                 Debug.Log("Client" + this + " found a table: " + t);
                 table = t;
+                t.currentOwner = this;
                 break;
             }
         }
@@ -261,6 +262,15 @@ public class ClientScript : MonoBehaviour
 
             }
         }
+
+        if (state == AgentState.Wardering)
+        {
+            // set random destination
+            if (isDone())
+            {
+                agent.SetDestination(new Vector3(UnityEngine.Random.Range(-10, 10), 0, UnityEngine.Random.Range(-10, 10)));
+            }
+        }
     }
 
     // Update is called once per frame
@@ -274,5 +284,15 @@ public class ClientScript : MonoBehaviour
         updateClient(this.state);
 
         updateState();
+
+        // if moving set animation to walk and speed parameter to agent speed
+        if (isMoving())
+        {
+            animator.SetFloat("speed", agent.velocity.magnitude/2);
+        }
+        else
+        {
+            animator.SetFloat("speed", 0);  
+        }
     }
 }
