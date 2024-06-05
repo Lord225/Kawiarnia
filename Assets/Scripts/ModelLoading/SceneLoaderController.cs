@@ -33,7 +33,7 @@ public class SceneLoaderControllerEditor : Editor
 
         GUILayout.Space(10);
 
-        if (loader.loadPath != string.Empty)
+        if (loader.loadPath != string.Empty && pathToSave == string.Empty)
         {
             pathToSave = loader.loadPath;
         }
