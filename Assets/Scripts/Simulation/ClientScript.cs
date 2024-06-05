@@ -130,16 +130,16 @@ public class ClientScript : MonoBehaviour
 
     public enum AgentState
     {
-        WantsTable, 
-        GoingToTable,
+        WantsTable, // client is looking for table, 
+        GoingToTable, // client is going to table
         WantsToOrder, // client is about to go to counter or waiter
-        GoingToCounter,
-        GoingForOrder,
+        GoingToCounter, // client is going to counter
+        GoingForOrder, // client is going to take order
         Wardering,
         WantsWaiter, // client waits for waiter to take order
         Ordering,    // client is ordering
         TakingOrder, // client is taking order
-        Eating,      
+        Eating,      // client is eating
         Leaving,
     }
 
@@ -176,6 +176,15 @@ public class ClientScript : MonoBehaviour
             
             agent.SetDestination(targets.First().transform.position);
         }
+
+        if (state == AgentState.Wardering || state == AgentState.WantsTable)
+        {
+            // set random destination
+            if (isDone())
+            {
+                agent.SetDestination(new Vector3(UnityEngine.Random.Range(-10, 10), 0, UnityEngine.Random.Range(-10, 10)));
+            }
+        }
     }
 
 
@@ -190,7 +199,11 @@ public class ClientScript : MonoBehaviour
 
         if(state == AgentState.GoingToTable)
         {
-            if (isDone())
+            if (isDone() && order != null)
+            {
+                state = AgentState.Eating;
+            } 
+            else
             {
                 state = AgentState.WantsToOrder;
             }
@@ -198,9 +211,9 @@ public class ClientScript : MonoBehaviour
 
         if (state == AgentState.WantsToOrder)
         {
-            float rnd = UnityEngine.Random.Range(0, 1);
+            float rnd = UnityEngine.Random.Range(0.0f, 1.0f);
 
-            if (rnd < 0.1)
+            if (rnd < 0.5)
             {
                 findCounter();
                 state = AgentState.GoingToCounter;
@@ -259,18 +272,10 @@ public class ClientScript : MonoBehaviour
                 // go to table
                 agent.SetDestination(table.transform.position);
                 state = AgentState.GoingToTable;
-
             }
         }
 
-        if (state == AgentState.Wardering || state == AgentState.WantsTable)
-        {
-            // set random destination
-            if (isDone())
-            {
-                agent.SetDestination(new Vector3(UnityEngine.Random.Range(-10, 10), 0, UnityEngine.Random.Range(-10, 10)));
-            }
-        }
+ 
     }
 
     // Update is called once per frame

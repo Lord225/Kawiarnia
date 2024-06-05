@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
+using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCounters;
 
 public class WaiterScript : MonoBehaviour
 {
@@ -12,20 +13,37 @@ public class WaiterScript : MonoBehaviour
     public enum State
     {
         Idle,
+        Walking,
         Serving,
         Baristing,
     }
 
     public State state = State.Idle;
     public CounterScript counter = null;
-    public TableScript currentTable = null;
+    public ClientScript currentClient = null;
+    
+
+    bool isDone()
+    {
+        if (!agent.pathPending)
+        {
+            if (agent.remainingDistance <= agent.stoppingDistance)
+            {
+                if (!agent.hasPath || agent.velocity.sqrMagnitude == 0f)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     public bool isFree()
     {
-        return state == State.Idle;
+        return state == State.Idle || state == State.Walking;
     }
 
-    public void findCounter()
+    public void findCounter(bool withOrders = false)
     {
         var bar = GameObject.Find("Bars");
         if (bar == null)
@@ -37,7 +55,9 @@ public class WaiterScript : MonoBehaviour
         var counter = bar.GetComponentsInChildren<CounterScript>();
 
         // sort by distance
-        Func<Vector3, float> heuristic = (Vector3 pos) => Vector3.Distance(pos, transform.position) + UnityEngine.Random.Range(0, 1);
+        Func<Vector3, float> heuristic = (Vector3 pos) => Vector3.Distance(pos, transform.position) + 
+                                                          UnityEngine.Random.Range(0, 1) + 
+                                                          (withOrders ? counter.First().orders.Count : 0);
 
         var targets = counter.OrderBy(c => heuristic(c.transform.position));
 
@@ -52,9 +72,9 @@ public class WaiterScript : MonoBehaviour
     {
         if (isFree())
         {
-            currentTable = whoAsks.table;
+            currentClient = whoAsks;
             state = State.Serving;
-
+            Debug.Log("Waiter " + name + " is serving client " + whoAsks.name);
             return this;
         }
         return null;
@@ -62,7 +82,25 @@ public class WaiterScript : MonoBehaviour
 
     void serveClient()
     {
-        
+        if(currentClient == null )
+        {
+            state = State.Idle;
+        }
+
+        if(counter == null)
+        {
+            findCounter();
+        }
+
+        if (isDone())
+        {
+            Debug.Log("Waiter: Hello " + currentClient.name + ", what would you like to order?");
+            // serve client
+            counter.addOrder(currentClient);
+            currentClient = null;
+            state = State.Idle;
+        } 
+        agent.SetDestination(currentClient.transform.position);
     }
 
     // Start is called before the first frame update
@@ -74,6 +112,52 @@ public class WaiterScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if(state == State.Serving)
+        {
+            serveClient();
+        }
+        if (state == State.Idle)
+        {
+            var rnd = UnityEngine.Random.Range(0.0f, 1.0f);
+            if (rnd < 0.5)
+            {
+                agent.SetDestination(new Vector3(UnityEngine.Random.Range(-10, 10), 0, UnityEngine.Random.Range(-10, 10)));
+                state = State.Walking;
+            } else
+            {
+                state = State.Baristing;
+            }
+        }
+        if(state == State.Walking)
+        {
+            if (isDone())
+            {
+                state = State.Idle;
+            }
+        }
+        if(state == State.Baristing)
+        {
+            findCounter(withOrders: true);
+
+            if (counter != null)
+            {
+                agent.SetDestination(counter.baristaTarget.position);
+            }
+
+            if (isDone())
+            {
+                counter.makeDrink();
+                Invoke("waitForDrinksToFinish", 5);
+            }
+        }
     }
+
+    void waitForDrinksToFinish()
+    {
+        counter.stopMakingDrink();
+        state = State.Idle;
+    }
+
+
+
 }

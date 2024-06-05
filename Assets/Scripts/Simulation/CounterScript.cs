@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.PackageManager;
 using UnityEngine;
+using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCounters;
 
 public class CounterScript : MonoBehaviour
 {
@@ -13,6 +14,7 @@ public class CounterScript : MonoBehaviour
 
 
     public Transform target = null;
+    public Transform baristaTarget = null;
     // show in Inspector
 
     public List<Order> orders = new List<Order>();
@@ -55,12 +57,35 @@ public class CounterScript : MonoBehaviour
         }
     }
 
+
+    bool procesing = false;
+    public void makeDrink()
+    {
+        procesing = true;
+    }
+
+    public void stopMakingDrink()
+    {
+        procesing = false;
+    }
+
+    public void drinkTask()
+    {
+        if (procesing)
+        {
+            finishNextOrder();
+        }
+    }
+
     // Start is called before the first frame update
     void Start()
     {
         // get target empty from children
-        target = transform.Find("target");
+        target = transform.Find("client");
+        baristaTarget = transform.Find("target");
 
+        // start drink task
+        InvokeRepeating("drinkTask", 0, 3);
     }
 
     // Update is called once per frame
