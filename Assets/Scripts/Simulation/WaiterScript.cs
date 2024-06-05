@@ -107,6 +107,7 @@ public class WaiterScript : MonoBehaviour
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
+        findCounter();
     }
 
     // Update is called once per frame
