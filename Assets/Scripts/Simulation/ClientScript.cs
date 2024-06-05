@@ -334,4 +334,9 @@ public class ClientScript : MonoBehaviour
             animator.SetFloat("speed", 0);  
         }
     }
+
+    private void OnDestroy()
+    {
+        Destroy(hi.gameObject);
+    }
 }
