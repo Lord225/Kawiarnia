@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class CounterScript : MonoBehaviour
 {
+    [System.Serializable]
     public class Order
     {
         public ClientScript client;
@@ -12,6 +13,8 @@ public class CounterScript : MonoBehaviour
 
 
     public Transform target = null;
+    // show in Inspector
+
     public List<Order> orders = new List<Order>();
     public List<Order> finishedOrders = new List<Order>();
 

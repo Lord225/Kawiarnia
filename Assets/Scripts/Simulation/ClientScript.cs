@@ -263,7 +263,7 @@ public class ClientScript : MonoBehaviour
             }
         }
 
-        if (state == AgentState.Wardering)
+        if (state == AgentState.Wardering || state == AgentState.WantsTable)
         {
             // set random destination
             if (isDone())
