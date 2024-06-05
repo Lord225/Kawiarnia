@@ -9,7 +9,7 @@ public class ClientScript : MonoBehaviour
 {
     private NavMeshAgent agent;
     private Animator animator;
-    public CounterScript.Order order;
+    private CounterScript.Order order = null;
     public GameObject hoverIcon;
 
     //hi - hover icon for this client
@@ -216,13 +216,16 @@ public class ClientScript : MonoBehaviour
         if(state == AgentState.GoingToTable)
         {
             hi.ChangeIconVisibility(false);
-            if (isDone() && order != null)
+            if (isDone())
             {
-                state = AgentState.Eating;
-            } 
-            else
-            {
-                state = AgentState.WantsToOrder;
+                if (order != null)
+                {
+                    state = AgentState.Eating;
+                }
+                else
+                {
+                    state = AgentState.WantsToOrder;
+                }
             }
         }
 
