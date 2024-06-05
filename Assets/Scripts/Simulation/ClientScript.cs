@@ -10,6 +10,10 @@ public class ClientScript : MonoBehaviour
     private NavMeshAgent agent;
     private Animator animator;
     private CounterScript.Order order;
+    public GameObject hoverIcon;
+
+    //hi - hover icon for this client
+    private HoverIcon hi;
 
 
     bool isDone()
@@ -148,6 +152,12 @@ public class ClientScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        // initialize hoverIcon
+
+        Transform hiCanvas = GameObject.Find("HoverIconCanvas").transform;
+        hi = Instantiate(hoverIcon, hiCanvas).GetComponent<HoverIcon>();
+        hi.followedTransform = transform;
+
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
     }
@@ -188,17 +198,30 @@ public class ClientScript : MonoBehaviour
             agent.stoppingDistance = 2;
         }
 
+        if (state == AgentState.WantsTable)
+        {
+            hi.ChangeIconVisibility(true);
+            hi.ChangeIcon(0);
+        } 
+
         if(state == AgentState.GoingToTable)
         {
+            hi.ChangeIconVisibility(false);
             if (isDone())
             {
                 state = AgentState.WantsToOrder;
             }
         }
 
+        if(state == AgentState.Wardering)
+        {
+            hi.ChangeIconVisibility(false);
+        }
+
         if (state == AgentState.WantsToOrder)
         {
             float rnd = UnityEngine.Random.Range(0, 1);
+            hi.ChangeIconVisibility(false);
 
             if (rnd < 0.1)
             {
@@ -219,6 +242,7 @@ public class ClientScript : MonoBehaviour
 
         if (state == AgentState.GoingToCounter)
         {
+            hi.ChangeIconVisibility(false);
             if (isDone())
             {
                 state = AgentState.Ordering;
@@ -227,15 +251,23 @@ public class ClientScript : MonoBehaviour
 
         if(state == AgentState.Ordering)
         {
+            hi.ChangeIconVisibility(true);
+            hi.ChangeIcon(1);
             if (isDone())
             {
                 counter.addOrder(this);
                 state = AgentState.Wardering;
             }
         }
-
+        if(state == AgentState.TakingOrder)
+        {
+            hi.ChangeIconVisibility(true);
+            hi.ChangeIcon(2);
+        }
         if (state == AgentState.Eating)
         {
+            hi.ChangeIconVisibility(true);
+            hi.ChangeIcon(2);
             if (animator.GetCurrentAnimatorStateInfo(0).normalizedTime > 1 && !animator.IsInTransition(0))
             {
                 state = AgentState.Leaving;
@@ -244,6 +276,8 @@ public class ClientScript : MonoBehaviour
 
         if (state == AgentState.Leaving)
         {
+            hi.ChangeIconVisibility(true);
+            hi.ChangeIcon(3);
             if (isDone())
             {
                 Destroy(gameObject);

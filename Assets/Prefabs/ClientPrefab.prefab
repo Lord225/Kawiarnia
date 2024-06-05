@@ -161,6 +161,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1afbe4712baf69348beaf4ed92fd18d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hoverIcon: {fileID: 4011673008086929848, guid: 41e35b9476a5280429861e7fd1d6e5a3, type: 3}
   table: {fileID: 0}
   counter: {fileID: 0}
   patience: 10
