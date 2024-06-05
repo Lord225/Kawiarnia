@@ -124,7 +124,7 @@ public class WaiterScript : MonoBehaviour
             {
                 agent.SetDestination(new Vector3(UnityEngine.Random.Range(-10, 10), 0, UnityEngine.Random.Range(-10, 10)));
                 state = State.Walking;
-            } else
+            } else if (counter.ordersAvailable() > 0)
             {
                 state = State.Baristing;
             }

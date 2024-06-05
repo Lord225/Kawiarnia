@@ -9,7 +9,7 @@ public class ClientScript : MonoBehaviour
 {
     private NavMeshAgent agent;
     private Animator animator;
-    private CounterScript.Order order;
+    public CounterScript.Order order;
     public GameObject hoverIcon;
 
     //hi - hover icon for this client
