@@ -48,6 +48,8 @@ public class AlterInfo
 
     public float minBaristaSpeed = 4;
     public float maxBaristaSpeed = 4;
+
+    public float coffeeCost = 6;
 }
 
 public class Load
@@ -146,7 +148,21 @@ namespace RESTfulHTTPServer.src.invoker
 
             UnityInvoker.ExecuteOnMainThread.Enqueue(() =>
             {
-                //TODO: do something with the settings here
+                BaristaSettings baristaSettings = GameObject.Find("Waiters").GetComponent<BaristaSettings>();
+                int returnCode = baristaSettings.AlterBaristas(alterInfo);
+
+                if (returnCode == 0)
+                {
+                    response.SetContent("200");
+                    response.SetHTTPStatusCode(200);
+                    responseMade = true;
+                }
+                else
+                {
+                    response.SetContent("403");
+                    response.SetHTTPStatusCode(403);
+                    responseMade = true;
+                }
 
                 response.SetContent("200");
                 response.SetHTTPStatusCode(200);

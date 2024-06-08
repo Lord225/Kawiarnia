@@ -169,6 +169,12 @@ public class WaiterScript : MonoBehaviour
         state = State.Idle;
     }
 
-
+    private void OnDestroy()
+    {
+        if (hi != null)
+        {
+            Destroy(hi.gameObject);
+        }
+    }
 
 }
