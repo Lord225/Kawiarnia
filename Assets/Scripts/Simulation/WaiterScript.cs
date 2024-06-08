@@ -9,6 +9,10 @@ using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCou
 public class WaiterScript : MonoBehaviour
 {
     private NavMeshAgent agent;
+    public GameObject hoverIcon;
+
+    //hi - hover icon for this client
+    private HoverIcon hi;
 
     public enum State
     {
@@ -106,6 +110,10 @@ public class WaiterScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Transform hiCanvas = GameObject.Find("HoverIconCanvas").transform;
+        hi = Instantiate(hoverIcon, hiCanvas).GetComponent<HoverIcon>();
+        hi.followedTransform = transform;
+
         agent = GetComponent<NavMeshAgent>();
         findCounter();
     }
@@ -137,7 +145,7 @@ public class WaiterScript : MonoBehaviour
             }
         }
         if(state == State.Baristing)
-        {
+        {   
             findCounter(withOrders: true);
 
             if (counter != null)
@@ -148,6 +156,7 @@ public class WaiterScript : MonoBehaviour
             if (isDone())
             {
                 counter.makeDrink();
+                hi.ChangeIconVisibility(true);
                 Invoke("waitForDrinksToFinish", 5);
             }
         }
@@ -155,6 +164,7 @@ public class WaiterScript : MonoBehaviour
 
     void waitForDrinksToFinish()
     {
+        hi.ChangeIconVisibility(false);
         counter.stopMakingDrink();
         state = State.Idle;
     }

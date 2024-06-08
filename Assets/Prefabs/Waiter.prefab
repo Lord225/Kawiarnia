@@ -102,6 +102,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0fba39cf9daa0f74faca6a909f11823b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hoverIcon: {fileID: 241669033083963382, guid: e071c0f95ed71114abd69ef89288a8c2, type: 3}
   state: 0
   counter: {fileID: 0}
-  currentTable: {fileID: 0}
+  currentClient: {fileID: 0}
