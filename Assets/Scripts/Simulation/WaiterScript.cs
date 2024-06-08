@@ -19,6 +19,7 @@ public class WaiterScript : MonoBehaviour
         Idle,
         Walking,
         Serving,
+        GoToCounter,
         Baristing,
     }
 
@@ -100,15 +101,17 @@ public class WaiterScript : MonoBehaviour
             findCounter();
         }
 
+        agent.SetDestination(currentClient.transform.position);
+
         if (isDone())
         {
             Debug.Log("Waiter: Hello " + currentClient.name + ", what would you like to order?");
             // serve client
             counter.addOrder(currentClient);
+            currentClient.waiterServes(this);
             currentClient = null;
             state = State.Idle;
         } 
-        agent.SetDestination(currentClient.transform.position);
     }
 
     // Start is called before the first frame update
@@ -143,7 +146,7 @@ public class WaiterScript : MonoBehaviour
                 state = State.Walking;
             } else if (counter.ordersAvailable() > 0)
             {
-                state = State.Baristing;
+                state = State.GoToCounter;
             }
             if(timestamp == -1)
             {
@@ -162,15 +165,22 @@ public class WaiterScript : MonoBehaviour
                 timestamp = -1;
             }
         }
-        if(state == State.Baristing)
-        {   
+        if(state == State.GoToCounter)
+        {
             findCounter(withOrders: true);
 
             if (counter != null)
             {
                 agent.SetDestination(counter.baristaTarget.position);
+                state = State.Baristing;
             }
-
+            else
+            {
+                state = State.Idle;
+            }
+        }
+        if(state == State.Baristing)
+        {   
             if (isDone())
             {
                 counter.makeDrink();

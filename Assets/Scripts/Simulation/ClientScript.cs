@@ -16,6 +16,7 @@ public class ClientScript : MonoBehaviour
     private HoverIcon hi;
 
     private float timestamp = -1f;
+    private float wkurw = 0f;
 
 
     bool isDone()
@@ -79,7 +80,7 @@ public class ClientScript : MonoBehaviour
         }
     }
 
-    void findCounter()
+    void findCounter(bool with_my_order = false)
     {
         var bar = GameObject.Find("Bars");
         if (bar == null)
@@ -94,6 +95,13 @@ public class ClientScript : MonoBehaviour
         Func<Vector3, float> heuristic = (Vector3 pos) => Vector3.Distance(pos, transform.position) + UnityEngine.Random.Range(0, 1);
 
         var targets = counter.OrderBy(c => heuristic(c.transform.position));
+
+        // get counters that have my order if with_my_order
+        if (with_my_order)
+        {
+            targets = targets.Where(c => c.containsOrder(this))
+                .OrderBy(c => heuristic(c.transform.position));
+        }
 
         // try getting first counter,
         if (targets.Count() > 0)
@@ -133,6 +141,11 @@ public class ClientScript : MonoBehaviour
             state = AgentState.GoingForOrder;
             agent.SetDestination(counter.target.position);
         }
+    }
+
+    public void waiterServes(WaiterScript waiter)
+    {
+        state = AgentState.Wardering;
     }
 
     public enum AgentState
@@ -325,8 +338,19 @@ public class ClientScript : MonoBehaviour
         {
             if (isDone())
             {
+                findCounter(with_my_order: true);
+                if(counter == null)
+                {
+                    state = AgentState.Wardering;
+                    return;
+                }
                 // get order
                 order = counter.takeOrder(this);
+                if(order == null)
+                {
+                    state = AgentState.WantsToOrder;
+                    return;
+                }
                 // go to table
                 agent.SetDestination(table.transform.position);
                 state = AgentState.GoingToTable;
@@ -352,7 +376,6 @@ public class ClientScript : MonoBehaviour
                 }
             }
         }
-
     }
 
     // Update is called once per frame

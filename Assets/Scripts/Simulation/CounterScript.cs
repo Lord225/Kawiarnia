@@ -45,6 +45,11 @@ public class CounterScript : MonoBehaviour
         return null;
     }
 
+    public bool containsOrder(ClientScript client)
+    {
+        return finishedOrders.Find(o => o.client == client) != null;
+    }
+
 
     void finishNextOrder()
     {
