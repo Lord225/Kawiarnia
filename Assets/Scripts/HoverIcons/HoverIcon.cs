@@ -13,22 +13,30 @@ public class HoverIcon : MonoBehaviour
 
     private Camera cameraObject;
 
+    private Image background;
+
     public void ChangeIcon(int id)
     {
         image.sprite = icons[id];
     }
 
+    public void ChangeRed(float val)
+    {
+        background.color = Color.Lerp(Color.white, Color.red, val);
+    }
+
     public void ChangeIconVisibility(bool visible)
     {
         image.enabled = visible;
-        gameObject.GetComponent<Image>().enabled = visible;
-        transform.GetChild(0).GetComponent<Image>().enabled = visible;
+        background.enabled = visible;
+        transform.GetComponent<Image>().enabled = visible;
     }
 
     private void Start()
     {
         image = transform.GetChild(0).GetChild(0).GetComponent<Image>();
         cameraObject = GameObject.Find("Main Camera").GetComponent<Camera>();
+        background = transform.GetChild(0).GetComponent<Image>();
     }
 
     void Update()

@@ -15,6 +15,8 @@ public class ClientScript : MonoBehaviour
     //hi - hover icon for this client
     private HoverIcon hi;
 
+    private float timestamp = -1f;
+
 
     bool isDone()
     {
@@ -202,6 +204,7 @@ public class ClientScript : MonoBehaviour
     {
         if (state == AgentState.WantsTable && table != null)
         {
+            timestamp = -1f;
             state = AgentState.GoingToTable;
             agent.SetDestination(table.transform.position);
             agent.stoppingDistance = 2;
@@ -211,9 +214,22 @@ public class ClientScript : MonoBehaviour
         {
             hi.ChangeIconVisibility(true);
             hi.ChangeIcon(0);
-        } 
 
-        if(state == AgentState.GoingToTable)
+            if (timestamp == -1)
+            {
+                timestamp = Time.time;
+            }
+            else
+            {
+                float delta = Time.time - timestamp;
+                hi.ChangeRed(delta/patience);
+                if(delta > patience)
+                {
+                    state = AgentState.Leaving;
+                }
+            }
+        }
+            if (state == AgentState.GoingToTable)
         {
             hi.ChangeIconVisibility(false);
             if (isDone())
@@ -279,6 +295,15 @@ public class ClientScript : MonoBehaviour
         {
             hi.ChangeIconVisibility(true);
             hi.ChangeIcon(2);
+        } 
+        if (state == AgentState.Leaving)
+        {
+            hi.ChangeIconVisibility(true);
+            hi.ChangeIcon(3);
+            if (isDone())
+            {
+                Destroy(gameObject);
+            }
         }
         if (state == AgentState.Eating)
         {
@@ -289,17 +314,6 @@ public class ClientScript : MonoBehaviour
                 state = AgentState.Leaving;
             }
         }
-
-        if (state == AgentState.Leaving)
-        {
-            hi.ChangeIconVisibility(true);
-            hi.ChangeIcon(3);
-            if (isDone())
-            {
-                Destroy(gameObject);
-            }
-        }
-
         if (state == AgentState.GoingForOrder)
         {
             if (isDone())
@@ -340,6 +354,8 @@ public class ClientScript : MonoBehaviour
 
     private void OnDestroy()
     {
-        Destroy(hi.gameObject);
+        if (hi != null) {
+            Destroy(hi.gameObject);
+        }
     }
 }

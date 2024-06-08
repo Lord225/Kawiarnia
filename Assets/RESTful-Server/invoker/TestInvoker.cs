@@ -62,6 +62,7 @@ public class Stats
     public int drinksServed = 0;
     public int grossIncome = 0;
     public int idleBaristaTime = 0;
+    public int lostClients = 0;
     //smth else per whole coffee?
 }
 
