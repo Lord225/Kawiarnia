@@ -12,6 +12,8 @@ public class CounterScript : MonoBehaviour
         public ClientScript client;
     }
 
+    private Animator anim;
+
 
     public Transform target = null;
     public Transform baristaTarget = null;
@@ -91,12 +93,14 @@ public class CounterScript : MonoBehaviour
             timestamp = Time.time;
         }
         procesing = false;
+        anim.Play("Idle");
     }
 
     public void drinkTask()
     {
         if (procesing)
         {
+            anim.Play("Brewing");
             finishNextOrder();
         }
     }
@@ -111,6 +115,8 @@ public class CounterScript : MonoBehaviour
         // get target empty from children
         target = transform.Find("client");
         baristaTarget = transform.Find("target");
+
+        anim = GetComponent<Animator>();
 
         // start drink task
         InvokeRepeating("drinkTask", 0, 3);
