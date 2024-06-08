@@ -10,6 +10,7 @@ public class BaristaSettings : MonoBehaviour
     public GameObject barista;
     public Transform spawnPoint;
 
+    public int lostClients = 0;
     public float coffeeCost;
 
 
@@ -46,5 +47,21 @@ public class BaristaSettings : MonoBehaviour
         currentCount = info.baristaCount;
 
         return 0;
+    }
+
+    public Stats GetStats()
+    {
+        int drinksServed = 0;
+        float idleTime = 0f;
+
+        foreach (WaiterScript barista in transform.GetComponentsInChildren<WaiterScript>())
+        {
+            drinksServed += barista.drinksServed;
+            idleTime += barista.timeIdle;
+        }
+
+        Stats stats = new(drinksServed, (int)(drinksServed * coffeeCost), (int)idleTime, lostClients);
+
+        return stats;
     }
 }

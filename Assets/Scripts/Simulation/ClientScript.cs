@@ -47,6 +47,7 @@ public class ClientScript : MonoBehaviour
     public CounterScript counter;
     public float patience = 10;
     public float tableStopDistance = 2;
+    private bool angry = false;
 
     void findTable() {
         var tablesObject = GameObject.Find("Tables");
@@ -225,6 +226,7 @@ public class ClientScript : MonoBehaviour
                 hi.ChangeRed(delta/patience);
                 if(delta > patience)
                 {
+                    angry = true;
                     state = AgentState.Leaving;
                 }
             }
@@ -303,6 +305,7 @@ public class ClientScript : MonoBehaviour
             if (isDone())
             {
                 Destroy(gameObject);
+                if (angry) GameObject.Find("Waiters").GetComponent<BaristaSettings>().lostClients += 1;
             }
         }
         if (state == AgentState.Eating)

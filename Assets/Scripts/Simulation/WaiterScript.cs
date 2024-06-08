@@ -25,7 +25,11 @@ public class WaiterScript : MonoBehaviour
     public State state = State.Idle;
     public CounterScript counter = null;
     public ClientScript currentClient = null;
-    
+
+    public int drinksServed = 0;
+    public float timeIdle = 0f;
+
+    private float timestamp = -1;
 
     bool isDone()
     {
@@ -124,6 +128,11 @@ public class WaiterScript : MonoBehaviour
         if(state == State.Serving)
         {
             serveClient();
+            if (timestamp != -1)
+            {
+                timeIdle += Time.time - timestamp;
+                timestamp = -1;
+            }
         }
         if (state == State.Idle)
         {
@@ -136,12 +145,21 @@ public class WaiterScript : MonoBehaviour
             {
                 state = State.Baristing;
             }
+            if(timestamp == -1)
+            {
+                timestamp = Time.time;
+            }
         }
         if(state == State.Walking)
         {
             if (isDone())
             {
                 state = State.Idle;
+            }
+            if (timestamp != -1)
+            {
+                timeIdle += Time.time - timestamp;
+                timestamp = -1;
             }
         }
         if(state == State.Baristing)
@@ -159,12 +177,20 @@ public class WaiterScript : MonoBehaviour
                 hi.ChangeIconVisibility(true);
                 Invoke("waitForDrinksToFinish", 5);
             }
+            if (timestamp != -1)
+            {
+                timeIdle += Time.time - timestamp;
+                timestamp = -1;
+            }
         }
     }
 
     void waitForDrinksToFinish()
     {
         hi.ChangeIconVisibility(false);
+
+        drinksServed += 1;
+
         counter.stopMakingDrink();
         state = State.Idle;
     }

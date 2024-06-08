@@ -56,6 +56,12 @@ public class Load
 {
     public int clientsInTime = 0;
     public int idleTime = 0;
+
+    public Load(int clientsInTime, int idleTime)
+    {
+        this.clientsInTime = clientsInTime;
+        this.idleTime = idleTime;
+    }
     //smth else per table/bar?
 }
 
@@ -65,6 +71,14 @@ public class Stats
     public int grossIncome = 0;
     public int idleBaristaTime = 0;
     public int lostClients = 0;
+
+    public Stats(int drinksServed, int grossIncome, int idleBaristaTime, int lostClients)
+    {
+        this.drinksServed = drinksServed;
+        this.grossIncome = grossIncome;
+        this.idleBaristaTime = idleBaristaTime;
+        this.lostClients = lostClients;
+    }
     //smth else per whole coffee?
 }
 
@@ -180,7 +194,6 @@ namespace RESTfulHTTPServer.src.invoker
             Response response = new();
             bool responseMade = false;
             string id = "";
-            Load load = new();
 
             UnityInvoker.ExecuteOnMainThread.Enqueue(() =>
             {
@@ -197,9 +210,9 @@ namespace RESTfulHTTPServer.src.invoker
                     //TODO: set some actuall load data
                     
 
-                    string content = JsonUtility.ToJson(load);
+                    //string content = JsonUtility.ToJson(load);
 
-                    response.SetContent(content);
+                    //response.SetContent(content);
                     response.SetHTTPStatusCode(200);
                     responseMade = true;
                 }
@@ -215,13 +228,12 @@ namespace RESTfulHTTPServer.src.invoker
             Response response = new();
             bool responseMade = false;
 
-            Stats stats = new();
 
             UnityInvoker.ExecuteOnMainThread.Enqueue(() =>
             {
-                //TODO: get some real statistics here
-                
-                string content = JsonUtility.ToJson(stats);
+                BaristaSettings baristaSettings = GameObject.Find("Waiters").GetComponent<BaristaSettings>();
+
+                string content = JsonUtility.ToJson(baristaSettings.GetStats());
 
                 response.SetContent(content);
                 response.SetHTTPStatusCode(200);
