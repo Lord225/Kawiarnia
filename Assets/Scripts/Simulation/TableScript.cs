@@ -6,16 +6,28 @@ public class TableScript : MonoBehaviour
 {
 
     public Object currentOwner;
+    public float idleTime;
+    public int clientsInTime;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    private float timestamp = -1f;
 
-    // Update is called once per frame
     void Update()
     {
-        
+        if (currentOwner == null)
+        {
+            if (timestamp == -1f)
+            {
+                timestamp = Time.time;
+            }
+        }
+        else
+        {
+            if (timestamp != -1f)
+            {
+                clientsInTime += 1;
+                idleTime += Time.time - timestamp;
+                timestamp = -1f;
+            }
+        }
     }
 }

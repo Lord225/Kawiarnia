@@ -19,6 +19,10 @@ public class CounterScript : MonoBehaviour
 
     public List<Order> orders = new List<Order>();
     public List<Order> finishedOrders = new List<Order>();
+    public float idleTime;
+    public int clientsInTime;
+
+    private float timestamp = -1f;
 
     public void addOrder(ClientScript client)
     {
@@ -66,11 +70,21 @@ public class CounterScript : MonoBehaviour
     bool procesing = false;
     public void makeDrink()
     {
+        if (timestamp != -1f)
+        {
+            clientsInTime += 1;
+            idleTime += Time.time - timestamp;
+            timestamp = -1f;
+        }
         procesing = true;
     }
 
     public void stopMakingDrink()
     {
+        if (timestamp == -1f)
+        {
+            timestamp = Time.time;
+        }
         procesing = false;
     }
 
@@ -85,6 +99,10 @@ public class CounterScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        if (timestamp == -1f)
+        {
+            timestamp = Time.time;
+        }
         // get target empty from children
         target = transform.Find("client");
         baristaTarget = transform.Find("target");

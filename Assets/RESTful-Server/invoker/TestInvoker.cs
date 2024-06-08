@@ -54,12 +54,12 @@ public class AlterInfo
 
 public class Load
 {
-    public int clientsInTime = 0;
+    public int loadInTime = 0;
     public int idleTime = 0;
 
-    public Load(int clientsInTime, int idleTime)
+    public Load(int loadInTime, int idleTime)
     {
-        this.clientsInTime = clientsInTime;
+        this.loadInTime = loadInTime;
         this.idleTime = idleTime;
     }
     //smth else per table/bar?
@@ -190,16 +190,28 @@ namespace RESTfulHTTPServer.src.invoker
 
         public static Response GetLoad(Request request)
         {
-            Debug.Log("load");
             Response response = new();
             bool responseMade = false;
             string id = "";
 
+            try
+            {
+                id = request.GetParameter("id");
+            }
+            catch (FormatException)
+            {
+                response.SetContent("404");
+                response.SetHTTPStatusCode(404);
+                return response;
+            }
+
+            Debug.Log("id: " + id);
+
             UnityInvoker.ExecuteOnMainThread.Enqueue(() =>
             {
-                GameObject door = GameObject.Find(id);
+                GameObject idObject = GameObject.Find(id);
 
-                if (door != null)
+                if (idObject == null)
                 {
                     response.SetContent("403");
                     response.SetHTTPStatusCode(403);
@@ -208,11 +220,29 @@ namespace RESTfulHTTPServer.src.invoker
                 else
                 {
                     //TODO: set some actuall load data
-                    
 
-                    //string content = JsonUtility.ToJson(load);
+                    int loadInTime;
+                    float idleTime;
 
-                    //response.SetContent(content);
+                    TableScript ts = idObject.GetComponent<TableScript>();
+
+                    if (ts != null)
+                    {
+                        loadInTime = ts.clientsInTime;
+                        idleTime = ts.idleTime;
+                    }
+                    else
+                    {
+                        CounterScript cs = idObject.GetComponent<CounterScript>();
+                        loadInTime = cs.clientsInTime;
+                        idleTime = cs.idleTime;
+                    }
+
+                    Load load = new(loadInTime, (int)idleTime);
+
+                    string content = JsonUtility.ToJson(load);
+
+                    response.SetContent(content);
                     response.SetHTTPStatusCode(200);
                     responseMade = true;
                 }

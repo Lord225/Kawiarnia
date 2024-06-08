@@ -234,6 +234,11 @@ public class ClientScript : MonoBehaviour
             if (state == AgentState.GoingToTable)
         {
             hi.ChangeIconVisibility(false);
+            if (order != null)
+            {
+                hi.ChangeIconVisibility(true);
+                hi.ChangeIcon(2);
+            }
             if (isDone())
             {
                 if (order != null)
@@ -272,7 +277,6 @@ public class ClientScript : MonoBehaviour
                 }
             }
         }
-
 
         if (state == AgentState.GoingToCounter)
         {
@@ -328,8 +332,27 @@ public class ClientScript : MonoBehaviour
                 state = AgentState.GoingToTable;
             }
         }
+        if (state == AgentState.WantsWaiter)
+        {
+            hi.ChangeIconVisibility(true);
+            hi.ChangeIcon(1);
 
- 
+            if (timestamp == -1)
+            {
+                timestamp = Time.time;
+            }
+            else
+            {
+                float delta = Time.time - timestamp;
+                hi.ChangeRed(delta / patience);
+                if (delta > patience)
+                {
+                    angry = true;
+                    state = AgentState.Leaving;
+                }
+            }
+        }
+
     }
 
     // Update is called once per frame
