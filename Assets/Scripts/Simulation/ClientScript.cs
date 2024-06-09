@@ -16,7 +16,6 @@ public class ClientScript : MonoBehaviour
     private HoverIcon hi;
 
     private float timestamp = -1f;
-    private float wkurw = 0f;
 
 
     bool isDone()
@@ -219,6 +218,7 @@ public class ClientScript : MonoBehaviour
         if (state == AgentState.WantsTable && table != null)
         {
             timestamp = -1f;
+            hi.ChangeRed(0f);
             state = AgentState.GoingToTable;
             agent.SetDestination(table.transform.position);
             agent.stoppingDistance = 2;
@@ -268,6 +268,7 @@ public class ClientScript : MonoBehaviour
         if(state == AgentState.Wardering)
         {
             hi.ChangeIconVisibility(false);
+            hi.ChangeRed(0f);
         }
 
         if (state == AgentState.WantsToOrder)
