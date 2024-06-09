@@ -73,6 +73,11 @@ public class CounterScript : MonoBehaviour
         return orders.Count;
     }
 
+    public bool isSomeoneWorking()
+    {
+        return procesing == true;
+    }
+
 
     bool procesing = false;
     public void makeDrink()

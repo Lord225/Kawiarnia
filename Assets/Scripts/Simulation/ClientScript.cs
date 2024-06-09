@@ -135,7 +135,7 @@ public class ClientScript : MonoBehaviour
     public void orderReady(CounterScript counter)
     {
         // check if we are waiting for order
-        if (state == AgentState.Wardering)
+        if (state == AgentState.Wardering || state == AgentState.GoingToTableToWait)
         {
             state = AgentState.GoingForOrder;
             agent.SetDestination(counter.target.position);
@@ -144,7 +144,7 @@ public class ClientScript : MonoBehaviour
 
     public void waiterServes(WaiterScript waiter)
     {
-        state = AgentState.Wardering;
+        state = AgentState.GoingToTableToWait;
     }
 
     public enum AgentState
@@ -158,6 +158,7 @@ public class ClientScript : MonoBehaviour
         WantsWaiter, // client waits for waiter to take order
         Ordering,    // client is ordering
         TakingOrder, // client is taking order
+        GoingToTableToWait, // client is going to table to wait for order
         Eating,      // client is eating
         Leaving,
     }
@@ -308,7 +309,15 @@ public class ClientScript : MonoBehaviour
             if (isDone())
             {
                 counter.addOrder(this);
-                state = AgentState.Wardering;
+                float rnd = UnityEngine.Random.Range(0.0f, 1.0f);
+                if (rnd < 0.1)
+                {
+                    state = AgentState.Wardering;
+                } else
+                {
+                    state = AgentState.GoingToTableToWait;
+                    agent.SetDestination(table.transform.position);
+                }
             }
         }
         if(state == AgentState.TakingOrder)
