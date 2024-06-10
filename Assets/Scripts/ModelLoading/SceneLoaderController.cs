@@ -166,6 +166,7 @@ public class SceneDescription
     public List<Transformation> doorsPositions;
     public List<Transformation> barsPositions;
     public List<Transformation> tablesPositions;
+    public List<Transformation> decorationsPositions;
 }
 
 [RequireComponent(typeof(ModelLoader))]
@@ -179,6 +180,7 @@ public class SceneLoaderController : MonoBehaviour
     public GameObject doorObject;
     public GameObject barObject;
     public GameObject tableObject;
+    public GameObject decorationsObject;
 
     public Vector2 boundBoxX
     {
@@ -294,6 +296,14 @@ public class SceneLoaderController : MonoBehaviour
         Debug.Log("Placing " + sceneDescription.tablesPositions.Count + " tables");
         modelLoader.InitializeGameObjects(tableObject, sceneDescription.tablesPositions, tablesParent);
 
+        Transform decorationsParent = new GameObject("Decorations").transform;
+        decorationsParent.position = Vector3.zero;
+        decorationsParent.parent = transform;
+
+        // instantinate decorations at given postions
+        Debug.Log("Placing " + sceneDescription.decorationsPositions.Count + " decorations");
+        modelLoader.InitializeGameObjects(tableObject, sceneDescription.decorationsPositions, decorationsParent);
+
         var (x, z) = getBoundBox(floor);
 
         sceneDescription.boundBoxX = x;
@@ -408,9 +418,13 @@ public class SceneLoaderController : MonoBehaviour
         Transform tableParent = GameObject.Find("Tables").GetComponent<Transform>();
         var tables = tableParent.GetComponentsInChildren<Transform>().Where(t => t != tableParent && handler.IsUUIDValid(t.name));
 
+        Transform decorationsParent = GameObject.Find("Decorations").GetComponent<Transform>();
+        var decorations = decorationsParent.GetComponentsInChildren<Transform>().Where(t => t != decorationsParent && handler.IsUUIDValid(t.name));
+
         sceneDescription.doorsPositions = doors.Select(x => Transformation.fromTransform(x)).ToList();
         sceneDescription.barsPositions = bars.Select(x => Transformation.fromTransform(x)).ToList();
         sceneDescription.tablesPositions = tables.Select(x => Transformation.fromTransform(x)).ToList();
+        sceneDescription.decorationsPositions = decorations.Select(x => Transformation.fromTransform(x)).ToList();
 
         Transform objectsOnScreenParent = GameObject.Find("OOS").GetComponent<Transform>();
         var objectsOnScreen = objectsOnScreenParent.GetComponentsInChildren<DeployableObjectPath>().Where(t => t != objectsOnScreenParent && handler.IsUUIDValid(t.name));
