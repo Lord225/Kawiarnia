@@ -4,14 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
-using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCounters;
 
 public class WaiterScript : MonoBehaviour
 {
     private NavMeshAgent agent;
     public GameObject hoverIcon;
 
-    //hi - hover icon for this client
     private HoverIcon hi;
 
     public enum State
@@ -32,27 +30,11 @@ public class WaiterScript : MonoBehaviour
 
     private float timestamp = -1;
 
-    bool isDone()
-    {
-        if (!agent.pathPending)
-        {
-            if (agent.remainingDistance <= agent.stoppingDistance)
-            {
-                if (!agent.hasPath || agent.velocity.sqrMagnitude < 0.5f)
-                {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+    private bool IsDone() => !agent.pathPending && agent.remainingDistance <= agent.stoppingDistance && (agent.hasPath && agent.velocity.sqrMagnitude < 0.5f);
 
-    public bool isFree()
-    {
-        return state == State.Idle || state == State.Walking;
-    }
+    public bool IsFree() => state == State.Idle || state == State.Walking;
 
-    public void findCounter(bool withOrders = false)
+    private void FindCounter(bool withOrders = false)
     {
         var bar = GameObject.Find("Bars");
         if (bar == null)
@@ -61,156 +43,156 @@ public class WaiterScript : MonoBehaviour
             return;
         }
 
-        var counter = bar.GetComponentsInChildren<CounterScript>();
+        var counters = bar.GetComponentsInChildren<CounterScript>();
+        if (counters.Length == 0) return;
 
-        // sort by distance
-        Func<Vector3, float> heuristic = (Vector3 pos) => Vector3.Distance(pos, transform.position) + 
-                                                          UnityEngine.Random.Range(0, 1) + 
-                                                          (withOrders ? counter.First().orders.Count : 0);
-
-        var targets = counter.OrderBy(c => heuristic(c.transform.position));
-
-        // try getting first counter,
-        if (targets.Count() > 0)
-        {
-            this.counter = targets.First();
-        }
+        counter = counters
+            .OrderBy(c => Vector3.Distance(c.transform.position, transform.position) +
+                          (withOrders ? c.orders.Count : 0))
+            .FirstOrDefault();
     }
 
-    public WaiterScript askForService(ClientScript whoAsks)
+    public WaiterScript AskForService(ClientScript whoAsks)
     {
-        if (isFree())
+        if (IsFree())
         {
             currentClient = whoAsks;
             state = State.Serving;
-            Debug.Log("Waiter " + name + " is serving client " + whoAsks.name);
+            Debug.Log($"Waiter {name} is serving client {whoAsks.name}");
             return this;
         }
         return null;
     }
 
-    void serveClient()
+    private void ServeClient()
     {
-        if(currentClient == null )
+        if (currentClient == null)
         {
             state = State.Idle;
+            return;
         }
 
-        if(counter == null)
-        {
-            findCounter();
-        }
+        if (counter == null) FindCounter();
 
         agent.SetDestination(currentClient.transform.position);
 
-        if (isDone())
+        if (IsDone())
         {
-            Debug.Log("Waiter: Hello " + currentClient.name + ", what would you like to order?");
-            // serve client
-            counter.addOrder(currentClient);
-            currentClient.waiterServes(this);
+            Debug.Log($"Waiter: Hello {currentClient.name}, what would you like to order?");
+            counter?.addOrder(currentClient);
+            currentClient.WaiterServes(this);
             currentClient = null;
             state = State.Idle;
-        } 
+        }
     }
 
-    // Start is called before the first frame update
-    void Start()
+    private void GoToIdle()
+    {
+        var randomDecision = UnityEngine.Random.Range(0f, 1f);
+        if (randomDecision < 0.5f)
+        {
+            agent.SetDestination(new Vector3(UnityEngine.Random.Range(-10, 10), 0, UnityEngine.Random.Range(-10, 10)));
+            state = State.Walking;
+        }
+        else if (counter.ordersAvailable() > 0 && !counter.isSomeoneWorking())
+        {
+            state = State.GoToCounter;
+        }
+        if (timestamp == -1) timestamp = Time.time;
+    }
+
+    private void HandleWalking()
+    {
+        if (IsDone()) state = State.Idle;
+
+        if (timestamp != -1)
+        {
+            timeIdle += Time.time - timestamp;
+            timestamp = -1;
+        }
+    }
+
+    private void HandleCounterVisit()
+    {
+        FindCounter(withOrders: true);
+
+        if (counter != null)
+        {
+            agent.SetDestination(counter.baristaTarget.position);
+            state = State.Baristing;
+        }
+        else
+        {
+            state = State.Idle;
+        }
+    }
+
+    private void HandleBaristing()
+    {
+        if (IsDone())
+        {
+            counter?.makeDrink();
+            hi.ChangeIconVisibility(true);
+            Invoke(nameof(CompleteDrink), 5f);
+        }
+        if (timestamp != -1)
+        {
+            timeIdle += Time.time - timestamp;
+            timestamp = -1;
+        }
+    }
+
+    private void CompleteDrink()
+    {
+        hi.ChangeIconVisibility(false);
+        drinksServed++;
+        counter?.stopMakingDrink();
+        state = State.Idle;
+    }
+
+    private void Start()
     {
         Transform hiCanvas = GameObject.Find("HoverIconCanvas").transform;
         hi = Instantiate(hoverIcon, hiCanvas).GetComponent<HoverIcon>();
         hi.followedTransform = transform;
 
         agent = GetComponent<NavMeshAgent>();
-        findCounter();
+        FindCounter();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        if(state == State.Serving)
+        switch (state)
         {
-            serveClient();
-            if (timestamp != -1)
-            {
-                timeIdle += Time.time - timestamp;
-                timestamp = -1;
-            }
-        }
-        if (state == State.Idle)
-        {
-            var rnd = UnityEngine.Random.Range(0.0f, 1.0f);
-            if (rnd < 0.5)
-            {
-                agent.SetDestination(new Vector3(UnityEngine.Random.Range(-10, 10), 0, UnityEngine.Random.Range(-10, 10)));
-                state = State.Walking;
-            } else if (counter.ordersAvailable() > 0 && !counter.isSomeoneWorking())
-            {
-                state = State.GoToCounter;
-            }
-            if(timestamp == -1)
-            {
-                timestamp = Time.time;
-            }
-        }
-        if(state == State.Walking)
-        {
-            if (isDone())
-            {
-                state = State.Idle;
-            }
-            if (timestamp != -1)
-            {
-                timeIdle += Time.time - timestamp;
-                timestamp = -1;
-            }
-        }
-        if(state == State.GoToCounter)
-        {
-            findCounter(withOrders: true);
+            case State.Serving:
+                ServeClient();
+                if (timestamp != -1)
+                {
+                    timeIdle += Time.time - timestamp;
+                    timestamp = -1;
+                }
+                break;
 
-            if (counter != null)
-            {
-                agent.SetDestination(counter.baristaTarget.position);
-                state = State.Baristing;
-            }
-            else
-            {
-                state = State.Idle;
-            }
+            case State.Idle:
+                GoToIdle();
+                break;
+
+            case State.Walking:
+                HandleWalking();
+                break;
+
+            case State.GoToCounter:
+                HandleCounterVisit();
+                break;
+
+            case State.Baristing:
+                HandleBaristing();
+                break;
         }
-        if(state == State.Baristing)
-        {   
-            if (isDone())
-            {
-                counter.makeDrink();
-                hi.ChangeIconVisibility(true);
-                Invoke("waitForDrinksToFinish", 5);
-            }
-            if (timestamp != -1)
-            {
-                timeIdle += Time.time - timestamp;
-                timestamp = -1;
-            }
-        }
-    }
-
-    void waitForDrinksToFinish()
-    {
-        hi.ChangeIconVisibility(false);
-
-        drinksServed += 1;
-
-        counter.stopMakingDrink();
-        state = State.Idle;
     }
 
     private void OnDestroy()
     {
-        if (hi != null)
-        {
-            Destroy(hi.gameObject);
-        }
+        if (hi != null) Destroy(hi.gameObject);
     }
-
 }

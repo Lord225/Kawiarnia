@@ -61,9 +61,9 @@ public class CounterScript : MonoBehaviour
             orders.RemoveAt(0);
 
             finishedOrders.Add(order);
-            // order finished, ask client to take it
 
-            order.client.orderReady(this);
+            order.client.OrderReady();
+            
             Debug.Log("Finished order for " + order.client.name);
         }
     }
