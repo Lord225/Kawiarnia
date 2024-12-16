@@ -98,9 +98,12 @@ public class ClientScript : MonoBehaviour
             case AgentState.Ordering:
                 hi.ChangeIconVisibility(true);
                 hi.ChangeIcon(1);
-                if (IsDone())
+                if (IsDone() && counter != null)
                 {
-                    counter?.addOrder(this);
+                    if (!counter.containsOrder(this)) // Prevent redundant ordering
+                    {
+                        counter.addOrder(this);
+                    }
                     state = AgentState.WaitingForOrder;
                     agent.SetDestination(table.transform.position);
                     agent.stoppingDistance = tableStopDistance;
@@ -125,9 +128,10 @@ public class ClientScript : MonoBehaviour
                 break;
 
             case AgentState.GoingToTableWithOrder:
+                hi.ChangeIconVisibility(false);
                 if (IsDone())
                 {
-                    state = AgentState.Eating;
+                    state = AgentState.Eating; 
                 }
                 break;
 
@@ -178,14 +182,15 @@ public class ClientScript : MonoBehaviour
     {
         state = AgentState.WaitingForOrder;
         agent.SetDestination(table.transform.position);
-        agent.stoppingDistance = tableStopDistance;
     }
 
     public void OrderReady()
     {
-        state = AgentState.PickingUpOrder;
-        agent.SetDestination(counter.target.position);
-        agent.stoppingDistance = 1f;
+        if(state == AgentState.WaitingForOrder)
+        {
+            state = AgentState.PickingUpOrder;
+            agent.SetDestination(counter.target.position);
+        }
     }
 
     private void FindTable()
